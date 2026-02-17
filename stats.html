@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats Thermometer Simulator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f1923; /* Tmavé pozadí jako na screenu */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Styles for the main container holding two simulators */
+        #app-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align items to the top if they have different heights */
+            gap: 40px; /* Space between simulators */
+            padding: 20px;
+            box-sizing: border-box;
+            width: 100%; /* Take full width */
+            max-width: 1200px; /* Limit overall width */
+        }
+
+        .simulator-instance {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Flex-grow to allow expansion, flex-shrink to allow shrinking, flex-basis to set initial size */
+            flex: 1 1 45%; /* Each simulator takes roughly 45% of width, allowing gap */
+            min-width: 350px; /* Minimum width for each simulator */
+            max-width: 500px; /* Max width for each simulator */
+        }
+
+        /* Separator style */
+        .simulator-separator {
+            width: 2px;
+            background-color: #2c3e50; /* Dark grey line */
+            height: 100%; /* Take full height of app-container content */
+            align-self: stretch; /* Make it stretch to fill the height */
+            margin: 0 20px;
+        }
+
+
+        .controls {
+            background: #1e2732;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            width: 300px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .values-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* --- VIZUALIZACE TEPLOMĚRU --- */
+        .stat-row {
+            width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .stat-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            height: 12px; /* Výška baru */
+            background-color: #0f1923;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Pozadí pro prázdná místa (volitelné) */
+        .bar-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #2c3e50;
+            z-index: 0;
+            border-radius: 6px;
+        }
+
+        .bar {
+            height: 100%;
+            transition: width 0.3s ease; /* Animace změny */
+            z-index: 1;
+        }
+
+        .bar-home {
+            background-color: #e31b23; /* Červená */
+        }
+
+        .bar-away {
+            background-color: #ffffff; /* Bílá */
+        }
+
+        /* New styles for segments to make bars grow from center */
+        .bar-segment {
+            height: 100%;
+            display: flex;
+            flex: 1; /* Each takes 50% width of the container */
+            align-items: center;
+        }
+        .bar-segment.left {
+            justify-content: flex-end; /* Bar grows from right to left (towards center) */
+            padding-right: 2px; /* For the middle gap */
+        }
+        .bar-segment.right {
+            justify-content: flex-start; /* Bar grows from left to right (towards center) */
+            padding-left: 2px; /* For the middle gap */
+        }
+
+        .numbers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* New styles for team input sections */
+        .team-inputs {
+            background: #1e2732;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            width: 100%; /* Make team inputs fill their container */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .team-inputs h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-group label {
+            flex-basis: 40%;
+            margin-bottom: 0;
+            font-size: 1em;
+        }
+
+        .input-group input[type="number"] {
+            flex-basis: 55%;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #0f1923;
+            color: white;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container"></div>
+
+    <script>
+        // Modified update function to accept instanceId
+        function update(instanceId) {
+            // Helper function to get element by ID with instanceId suffix
+            const getEl = (id) => document.getElementById(id + instanceId);
+
+            // 1. Získání hodnot z nových textových polí
+            const homeSuccessful = parseInt(getEl('homeSuccessful').value) || 0;
+            const homeTotal = parseInt(getEl('homeTotal').value) || 0;
+            const awaySuccessful = parseInt(getEl('awaySuccessful').value) || 0;
+            const awayTotal = parseInt(getEl('awayTotal').value) || 0;
+
+            // Ensure total attempts are not zero to avoid division by zero
+            const safeHomeTotal = homeTotal === 0 ? 1 : homeTotal;
+            const safeAwayTotal = awayTotal === 0 ? 1 : awayTotal;
+
+            // Calculate percentages
+            const homePercentage = (homeSuccessful / safeHomeTotal) * 100;
+            const awayPercentage = (awaySuccessful / safeAwayTotal) * 100;
+
+            // Update textů pro složené statistiky
+            getEl('displayHomeComposite').innerText = homeTotal; // Zobrazuje pouze celkové pokusy
+            getEl('displayAwayComposite').innerText = awayTotal; // Zobrazuje pouze celkové pokusy
+            getEl('displayHomeSuccessfulValue').innerText = homeSuccessful;
+            getEl('displayAwaySuccessfulValue').innerText = awaySuccessful;
+            getEl('displayHomePercentage').innerText = `${homePercentage.toFixed(0)}%`; // New display for percentage bar
+            getEl('displayAwayPercentage').innerText = `${awayPercentage.toFixed(0)}%`; // New display for percentage bar
+
+            let widthHomeTotal = 0;
+            let widthAwayTotal = 0;
+            let widthHomeSuccessful = 0;
+            let widthAwaySuccessful = 0;
+            let widthHomePercentage = 0; // New width variable
+            let widthAwayPercentage = 0; // New width variable
+
+            // LOGIKA pro horní teploměr (Podle celkových pokusů)
+            const totalAllAttempts = homeTotal + awayTotal;
+            if (totalAllAttempts === 0) {
+                widthHomeTotal = 0;
+                widthAwayTotal = 0;
+            } else {
+                widthHomeTotal = (homeTotal / totalAllAttempts) * 100;
+                widthAwayTotal = (awayTotal / totalAllAttempts) * 100;
+            }
+
+            // LOGIKA pro dolní teploměr (Podle úspěšných pokusů)
+            const totalAllSuccessful = homeSuccessful + awaySuccessful;
+            if (totalAllSuccessful === 0) {
+                widthHomeSuccessful = 0;
+                widthAwaySuccessful = 0;
+            } else {
+                widthHomeSuccessful = (homeSuccessful / totalAllSuccessful) * 100;
+                widthAwaySuccessful = (awaySuccessful / totalAllSuccessful) * 100;
+            }
+
+            // LOGIKA pro třetí teploměr (Podle % úspěšnosti)
+            widthHomePercentage = homePercentage;
+            widthAwayPercentage = awayPercentage;
+
+            // Cap at 100%
+            if (widthHomePercentage > 100) widthHomePercentage = 100;
+            if (widthAwayPercentage > 100) widthAwayPercentage = 100;
+
+
+            // Aplikace do CSS (změněno pro tři bary)
+            // Dynamická změna barev podle větší hodnoty pro horní bar (Podle celkových pokusů)
+            if (homeTotal > awayTotal) {
+                getEl('barHomeTotal').style.backgroundColor = '#e31b23'; // Červená
+                getEl('barAwayTotal').style.backgroundColor = '#ffffff'; // Bílá
+            } else if (awayTotal > homeTotal) {
+                getEl('barHomeTotal').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayTotal').style.backgroundColor = '#e31b23'; // Červená
+            } else { // homeTotal == awayTotal
+                getEl('barHomeTotal').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayTotal').style.backgroundColor = '#ffffff'; // Bílá
+            }
+
+            // Dynamická změna barev podle větší hodnoty pro druhý bar (Podle úspěšných pokusů)
+            if (homeSuccessful > awaySuccessful) {
+                getEl('barHomeSuccessful').style.backgroundColor = '#e31b23'; // Červená
+                getEl('barAwaySuccessful').style.backgroundColor = '#ffffff'; // Bílá
+            } else if (awaySuccessful > homeSuccessful) {
+                getEl('barHomeSuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwaySuccessful').style.backgroundColor = '#e31b23'; // Červená
+            } else { // homeSuccessful == awaySuccessful
+                getEl('barHomeSuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwaySuccessful').style.backgroundColor = '#ffffff'; // Bílá
+            }
+
+            // Dynamická změna barev podle větší hodnoty pro třetí bar (Podle % úspěšnosti)
+            if (homePercentage > awayPercentage) {
+                getEl('barHomePercentage').style.backgroundColor = '#e31b23'; // Červená
+                getEl('barAwayPercentage').style.backgroundColor = '#ffffff'; // Bílá
+            } else if (awayPercentage > homePercentage) {
+                getEl('barHomePercentage').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayPercentage').style.backgroundColor = '#e31b23'; // Červená
+            } else { // homePercentage == awayPercentage
+                getEl('barHomePercentage').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayPercentage').style.backgroundColor = '#ffffff'; // Bílá
+            }
+
+            getEl('barHomeTotal').style.width = widthHomeTotal + '%';
+            getEl('barAwayTotal').style.width = widthAwayTotal + '%';
+            getEl('barHomeSuccessful').style.width = widthHomeSuccessful + '%';
+            getEl('barAwaySuccessful').style.width = widthAwaySuccessful + '%';
+            getEl('barHomePercentage').style.width = widthHomePercentage + '%'; // New width application
+            getEl('barAwayPercentage').style.width = widthAwayPercentage + '%'; // New width application
+        }
+
+        // Function to generate simulator HTML with unique IDs
+        function generateSimulator(instanceId) {
+            return `
+                <div class="simulator-instance">
+                    <div class="controls">
+                        <div class="team-inputs">
+                            <h3>Home Team</h3>
+                            <div class="input-group">
+                                <label for="homeSuccessful${instanceId}">Successful:</label>
+                                <input type="number" id="homeSuccessful${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                            <div class="input-group">
+                                <label for="homeTotal${instanceId}">Total:</label>
+                                <input type="number" id="homeTotal${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                        </div>
+
+                        <div class="team-inputs">
+                            <h3>Away Team</h3>
+                            <div class="input-group">
+                                <label for="awaySuccessful${instanceId}">Successful:</label>
+                                <input type="number" id="awaySuccessful${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                            <div class="input-group">
+                                <label for="awayTotal${instanceId}">Total:</label>
+                                <input type="number" id="awayTotal${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-title">Podle celkových pokusů</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomeComposite${instanceId}">0</span>
+                            <span id="displayAwayComposite${instanceId}">0</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomeTotal${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwayTotal${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-title">Podle úspěšných pokusů</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomeSuccessfulValue${instanceId}">0</span>
+                            <span id="displayAwaySuccessfulValue${instanceId}">0</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomeSuccessful${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwaySuccessful${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-title">Podle % úspěšnosti</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomePercentage${instanceId}">0%</span>
+                            <span id="displayAwayPercentage${instanceId}">0%</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomePercentage${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwayPercentage${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Init: Generate two simulators and append them
+        document.addEventListener('DOMContentLoaded', () => {
+            const appContainer = document.getElementById('app-container');
+            appContainer.innerHTML = generateSimulator('1');
+            appContainer.innerHTML += `<div class="simulator-separator"></div>`; // Separator
+            appContainer.innerHTML += generateSimulator('2');
+
+            // Initial update for both instances
+            update('1');
+            update('2');
+        });
+    </script>
+</body>
+</html>
