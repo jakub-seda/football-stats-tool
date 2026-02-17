@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulátor týmových statistik</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f1923; /* Tmavé pozadí jako na screenu */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Removed justify-content: center and height: 100vh */
+            min-height: 100vh; /* Ensure it takes at least 100vh, but can grow */
+            margin: 0;
+            font-size: 0.8em; /* Global font size reduction */
+            padding-top: 20px; /* Add some top padding */
+        }
+
+        /* Styles for the main container holding two simulators */
+        #app-container {
+            display: grid; /* Changed to grid */
+            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            gap: 30px; /* Reduced gap slightly for 80% scale */
+            padding: 15px; /* Reduced padding */
+            box-sizing: border-box;
+            width: 100%;
+            max-width: 960px; /* Scaled down to 80% of 1200px */
+        }
+
+        .simulator-instance {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Fill the grid cell */
+            box-sizing: border-box; /* Include padding in width */
+            max-width: none; /* Remove previous max-width */
+            /* Add border for visual separation */
+            border: 1px solid #2c3e50;
+            border-radius: 12px;
+            padding: 20px;
+            background: #1e2732;
+        }
+
+        .simulator-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #eee;
+            text-align: center;
+            display: flex; /* To align title and icon */
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* Space between title and icon */
+        }
+
+        .info-icon {
+            position: relative;
+            display: inline-flex; /* Use inline-flex for proper alignment */
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #2c3e50; /* Dark grey background */
+            color: #eee;
+            font-size: 0.8em;
+            font-weight: bold;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .info-icon:hover {
+            background-color: #34495e; /* Slightly lighter on hover */
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            top: 125%; /* Position below the icon */
+            
+            /* Default: centered */
+            left: 50%;
+            transform: translateX(-50%); 
+
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        /* Adjust tooltip for icons in the right column */
+        #app-container > .simulator-instance:nth-child(2) .info-icon .tooltip-text, /* Top right */
+        #app-container > .simulator-instance:nth-child(4) .info-icon .tooltip-text { /* Bottom right */
+            left: auto; /* Reset left */
+            right: 0; /* Align to the right edge of the info-icon */
+            transform: translateX(0); /* Reset transform */
+        }
+
+        .info-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Arrow for the tooltip */
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            bottom: 100%; /* Position above the tooltip, pointing upwards */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #333 transparent; /* Arrow points up */
+        }
+
+        /* Adjust tooltip arrow for icons in the right column */
+        #app-container > .simulator-instance:nth-child(2) .info-icon .tooltip-text::after, /* Top right */
+        #app-container > .simulator-instance:nth-child(4) .info-icon .tooltip-text::after { /* Bottom right */
+            left: auto; /* Reset left */
+            right: 5px; /* Position arrow from the right */
+            margin-left: 0; /* Reset margin-left */
+        }
+
+
+        .controls {
+            background: #1e2732; /* Keep dark background, but this is now inside .simulator-instance background */
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            width: 100%; /* Make controls responsive within simulator instance */
+            max-width: 300px; /* Retain visual size of controls */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .values-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* --- VIZUALIZACE TEPLOMĚRU --- */
+        .stat-row {
+            width: 100%; /* Make stat-row responsive within simulator instance */
+            max-width: 500px; /* Retain visual size of stat-row */
+            margin-bottom: 20px;
+        }
+
+        .stat-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            height: 12px; /* Výška baru */
+            background-color: #0f1923;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Pozadí pro prázdná místa (volitelné) */
+        .bar-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #2c3e50;
+            z-index: 0;
+            border-radius: 6px;
+        }
+
+        .bar {
+            height: 100%;
+            transition: width 0.3s ease; /* Animace změny */
+            z-index: 1;
+        }
+
+        .bar-home {
+            background-color: #e31b23; /* Červená */
+        }
+
+        .bar-away {
+            background-color: #ffffff; /* Bílá */
+        }
+
+        /* New styles for segments to make bars grow from center */
+        .bar-segment {
+            height: 100%;
+            display: flex;
+            flex: 1; /* Each takes 50% width of the container */
+            align-items: center;
+        }
+        .bar-segment.left {
+            justify-content: flex-end; /* Bar grows from right to left (towards center) */
+            padding-right: 2px; /* For the middle gap */
+        }
+        .bar-segment.right {
+            justify-content: flex-start; /* Bar grows from left to right (towards center) */
+            padding-left: 2px; /* For the middle gap */
+        }
+
+        .numbers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* New styles for team input sections */
+        .team-inputs {
+            background: #1e2732;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            width: 100%; /* Make team inputs fill their container */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .team-inputs h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-group label {
+            flex-basis: 40%;
+            margin-bottom: 0;
+            font-size: 1em;
+        }
+
+        .input-group input[type="number"] {
+            flex-basis: 55%;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #0f1923;
+            color: white;
+            font-size: 1em;
+        }
+
+        .navigation-bar {
+            width: 100%;
+            background-color: #1e2732;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .navigation-bar .nav-button {
+            background-color: #2c3e50; /* Darker tone */
+            color: white;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-bar .nav-button:hover {
+            background-color: #34495e;
+        }
+
+        /* Styles for Nested Bars */
+        .nested-bar-container { /* This is the outer most container for the whole bar visualization */
+            height: 20px; /* Slightly taller for nested effect */
+            background-color: transparent; /* Changed to transparent, segments will define background */
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .nested-bar-segment { /* Contains one outer bar */
+            height: 100%;
+            display: flex;
+            flex: 1;
+            align-items: center;
+            position: relative; /* Context for absolute positioning of outer/inner if needed, but inner is relative to outer */
+            overflow: hidden; /* Ensure inner bar is clipped by outer bar's boundary */
+        }
+
+        .nested-bar-outer { /* Bar A: Total Attempts */
+            background-color: #555; /* Darker grey for total attempts */
+            height: 100%;
+            position: relative; /* Context for inner bar */
+            width: 0%; /* Initial width set by JS */
+            transition: width 0.3s ease;
+            display: flex; /* To contain inner bar */
+            align-items: center;
+            /* Debugging styles */
+            /* min-width: 5px; */ 
+            /* border: 1px solid blue; */ 
+        }
+
+        .nested-bar-inner { /* Bar B: Successful Attempts, inside outer bar */
+            height: 100%;
+            position: absolute; /* Position within its parent (.nested-bar-outer) */
+            top: 0;
+            width: 0%; /* Initial width set by JS */
+            transition: width 0.3s ease;
+            z-index: 2;
+            /* No debugging min-width, border */
+            /* Removed temporary green background, will be set dynamically by JS */
+        }
+
+        /* Adjust positioning for left segment's outer/inner bars */
+        .nested-bar-segment.left .nested-bar-outer,
+        .nested-bar-segment.left .nested-bar-inner {
+            transform-origin: right;
+            right: 0;
+            left: auto; /* Push to the right edge of its parent */
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .nested-bar-segment.right .nested-bar-outer,
+        .nested-bar-segment.right .nested-bar-inner {
+            transform-origin: left;
+            left: 0;
+            right: auto;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navigation-bar">
+        <a href="index.html" class="nav-button">Hlavní stránka</a>
+        <a href="demonstracni_prostredi.html" class="nav-button">Demonstrační prostředí</a>
+    </div>
+
+    <div id="app-container"></div>
+
+    <script>
+        // Modified update function to accept instanceId
+        function update(instanceId) {
+            // Helper function to get element by ID with instanceId suffix
+            const getEl = (id) => document.getElementById(id + instanceId);
+
+            // 1. Získání hodnot z nových textových polí
+            const homeSuccessful = parseInt(getEl('homeSuccessful').value) || 0;
+            const homeTotal = parseInt(getEl('homeTotal').value) || 0;
+            const awaySuccessful = parseInt(getEl('awaySuccessful').value) || 0;
+            const awayTotal = parseInt(getEl('awayTotal').value) || 0;
+
+            // Ensure total attempts are not zero to avoid division by zero
+            const safeHomeTotal = homeTotal === 0 ? 1 : homeTotal;
+            const safeAwayTotal = awayTotal === 0 ? 1 : awayTotal;
+
+            // Calculate percentages
+            const homePercentage = (homeSuccessful / safeHomeTotal) * 100;
+            const awayPercentage = (awaySuccessful / safeAwayTotal) * 100;
+
+            // Update textů pro složené statistiky
+            // displayHomePercentage and displayAwayPercentage exist for all instances
+            getEl('displayHomePercentage').innerText = `${homePercentage.toFixed(0)}%`;
+            getEl('displayAwayPercentage').innerText = `${awayPercentage.toFixed(0)}%`;
+
+            if (instanceId === '3') {
+                // For instance 3 (Nested Bars)
+                // "Efektivita" bar uses displayHomeComposite/AwayComposite to show total attempts.
+                // It should show Successful/Total ratio
+                getEl('displayHomeComposite').innerText = `${homeSuccessful}/${homeTotal}`;
+                getEl('displayAwayComposite').innerText = `${awaySuccessful}/${awayTotal}`;
+                // displayHomeSuccessfulValue and displayAwaySuccessfulValue do not exist for instance 3
+            } else {
+                // For instances 1, 2, 4 (Normal Bars)
+                getEl('displayHomeComposite').innerText = homeTotal;
+                getEl('displayAwayComposite').innerText = awayTotal;
+                getEl('displayHomeSuccessfulValue').innerText = homeSuccessful;
+                getEl('displayAwaySuccessfulValue').innerText = awaySuccessful;
+            }
+
+            let widthHomeTotal = 0;
+            let widthAwayTotal = 0;
+            let widthHomeSuccessful = 0;
+            let widthAwaySuccessful = 0;
+            let widthHomePercentage = 0; // New width variable
+            let widthAwayPercentage = 0; // New width variable
+
+            // --- Logika škálování pro různé instance ---
+            if (instanceId === '1') {
+                // LOGIKA pro horní teploměr (Podle celkových pokusů) - Lineární podíl z celku
+                const totalAllAttempts = homeTotal + awayTotal;
+                if (totalAllAttempts === 0) {
+                    widthHomeTotal = 0;
+                    widthAwayTotal = 0;
+                } else {
+                    widthHomeTotal = (homeTotal / totalAllAttempts) * 100;
+                    widthAwayTotal = (awayTotal / totalAllAttempts) * 100;
+                }
+
+                // LOGIKA pro dolní teploměr (Podle úspěšných pokusů) - Lineární podíl z celku
+                const totalAllSuccessful = homeSuccessful + awaySuccessful;
+                if (totalAllSuccessful === 0) {
+                    widthHomeSuccessful = 0;
+                    widthAwaySuccessful = 0;
+                } else {
+                    widthHomeSuccessful = (homeSuccessful / totalAllSuccessful) * 100;
+                    widthAwaySuccessful = (awaySuccessful / totalAllSuccessful) * 100;
+                }
+            } else if (instanceId === '2') {
+                // LOGIKA pro horní teploměr (Podle celkových pokusů) - Nelineární "Hype" škálování (Power Law)
+                const powerFactor = 2; // Nastavte faktor umocnění (např. 2 nebo 3)
+                const homeTotalPowered = Math.pow(homeTotal, powerFactor);
+                const awayTotalPowered = Math.pow(awayTotal, powerFactor);
+                const totalAllAttemptsPowered = homeTotalPowered + awayTotalPowered;
+                
+                if (totalAllAttemptsPowered === 0) {
+                    widthHomeTotal = 0;
+                    widthAwayTotal = 0;
+                } else {
+                    widthHomeTotal = (homeTotalPowered / totalAllAttemptsPowered) * 100;
+                    widthAwayTotal = (awayTotalPowered / totalAllAttemptsPowered) * 100;
+                }
+
+                // LOGIKA pro dolní teploměr (Podle úspěšných pokusů) - Nelineární "Hype" škálování (Power Law)
+                const homeSuccessfulPowered = Math.pow(homeSuccessful, powerFactor);
+                const awaySuccessfulPowered = Math.pow(awaySuccessful, powerFactor);
+                const totalAllSuccessfulPowered = homeSuccessfulPowered + awaySuccessfulPowered;
+
+                if (totalAllSuccessfulPowered === 0) {
+                    widthHomeSuccessful = 0;
+                    widthAwaySuccessful = 0;
+                } else {
+                    widthHomeSuccessful = (homeSuccessfulPowered / totalAllSuccessfulPowered) * 100;
+                    widthAwaySuccessful = (awaySuccessfulPowered / totalAllSuccessfulPowered) * 100;
+                }
+            } else if (instanceId === '3') {
+                // LOGIKA pro vnořenou efektivitu (Nested Bars)
+                // Outer bar (Total Attempts) - Lineární podíl z celku (PROPORTIONAL SCALING)
+                const totalAllAttempts = homeTotal + awayTotal;
+                if (totalAllAttempts === 0) {
+                    widthHomeTotal = 0;
+                    widthAwayTotal = 0;
+                } else {
+                    widthHomeTotal = (homeTotal / totalAllAttempts) * 100;
+                    widthAwayTotal = (awayTotal / totalAllAttempts) * 100;
+                }
+
+                // Inner bar (Successful Attempts) - Represents successful % OF THE TOTAL ATTEMPTS
+                widthHomeSuccessful = homeTotal === 0 ? 0 : (homeSuccessful / homeTotal) * 100; 
+                widthAwaySuccessful = awayTotal === 0 ? 0 : (awaySuccessful / awayTotal) * 100; 
+                
+                // Cap widths at 100%
+                if (widthHomeTotal > 100) widthHomeTotal = 100;
+                if (widthAwayTotal > 100) widthAwayTotal = 100;
+                if (widthHomeSuccessful > 100) widthHomeSuccessful = 100; 
+                if (widthAwaySuccessful > 100) widthAwaySuccessful = 100; 
+            } else if (instanceId === '4') {
+                // LOGIKA pro logaritmické škálování
+                // Pro zabránění log(0) a aby malé hodnoty nebyly nulové, použijeme log(value + 1)
+                const homeTotalLog = Math.log(homeTotal + 1);
+                const awayTotalLog = Math.log(awayTotal + 1);
+                const totalAllAttemptsLog = homeTotalLog + awayTotalLog;
+
+                if (totalAllAttemptsLog === 0) {
+                    widthHomeTotal = 0;
+                    widthAwayTotal = 0;
+                } else {
+                    widthHomeTotal = (homeTotalLog / totalAllAttemptsLog) * 100;
+                    widthAwayTotal = (awayTotalLog / totalAllAttemptsLog) * 100;
+                }
+
+                const homeSuccessfulLog = Math.log(homeSuccessful + 1);
+                const awaySuccessfulLog = Math.log(awaySuccessful + 1);
+                const totalAllSuccessfulLog = homeSuccessfulLog + awaySuccessfulLog;
+
+                if (totalAllSuccessfulLog === 0) {
+                    widthHomeSuccessful = 0;
+                    widthAwaySuccessful = 0;
+                } else {
+                    widthHomeSuccessful = (homeSuccessfulLog / totalAllSuccessfulLog) * 100;
+                    widthAwaySuccessful = (awaySuccessfulLog / totalAllSuccessfulLog) * 100;
+                }
+            }
+
+
+            // LOGIKA pro třetí teploměr (Podle % úspěšnosti) - Stejná pro obě instance
+            widthHomePercentage = homePercentage;
+            widthAwayPercentage = awayPercentage;
+
+            // Cap at 100%
+            if (widthHomePercentage > 100) widthHomePercentage = 100;
+            if (widthAwayPercentage > 100) widthAwayPercentage = 100;
+
+
+            // Aplikace do CSS (změněno pro tři bary)
+            // Dynamická změna barev podle větší hodnoty pro horní bar (Podle celkových pokusů)
+            if (instanceId !== '3') { // Only apply this color logic to non-nested total bars
+                if (homeTotal > awayTotal) {
+                    getEl('barHomeTotal').style.backgroundColor = '#e31b23'; // Červená
+                    getEl('barAwayTotal').style.backgroundColor = '#ffffff'; // Bílá
+                } else if (awayTotal > homeTotal) {
+                    getEl('barHomeTotal').style.backgroundColor = '#ffffff'; // Bílá
+                    getEl('barAwayTotal').style.backgroundColor = '#e31b23'; // Červená
+                } else { // homeTotal == awayTotal
+                    getEl('barHomeTotal').style.backgroundColor = '#ffffff'; // Bílá
+                    getEl('barAwayTotal').style.backgroundColor = '#ffffff'; // Bílá
+                }
+            }
+
+
+            // Dynamická změna barev podle větší hodnoty pro druhý bar (Podle úspěšných pokusů)
+            if (instanceId !== '3') { // Only apply this color logic to non-nested successful bars
+                if (homeSuccessful > awaySuccessful) {
+                    getEl('barHomeSuccessful').style.backgroundColor = '#e31b23'; // Červená
+                    getEl('barAwaySuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                } else if (awaySuccessful > homeSuccessful) {
+                    getEl('barHomeSuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                    getEl('barAwaySuccessful').style.backgroundColor = '#e31b23'; // Červená
+                } else { // homeSuccessful == awaySuccessful
+                    getEl('barHomeSuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                    getEl('barAwaySuccessful').style.backgroundColor = '#ffffff'; // Bílá
+                }
+            }
+            
+
+            // Dynamická změna barev podle větší hodnoty pro třetí bar (Podle % úspěšnosti)
+            if (homePercentage > awayPercentage) {
+                getEl('barHomePercentage').style.backgroundColor = '#e31b23'; // Červená
+                getEl('barAwayPercentage').style.backgroundColor = '#ffffff'; // Bílá
+            } else if (awayPercentage > homePercentage) {
+                getEl('barHomePercentage').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayPercentage').style.backgroundColor = '#e31b23'; // Červená
+            } else { // homePercentage == awaySuccessful
+                getEl('barHomePercentage').style.backgroundColor = '#ffffff'; // Bílá
+                getEl('barAwayPercentage').style.backgroundColor = '#ffffff'; // Bílá
+            }
+
+            // If it's a nested bar, apply widths to nested elements
+            if (instanceId === '3') {
+                getEl('nestedBarHomeTotal').style.width = widthHomeTotal + '%'; // Outer bar
+                getEl('nestedBarAwayTotal').style.width = widthAwayTotal + '%'; // Outer bar
+
+                getEl('nestedBarHomeSuccessful').style.width = widthHomeSuccessful + '%'; // Inner bar
+                getEl('nestedBarAwaySuccessful').style.width = widthAwaySuccessful + '%'; // Inner bar
+
+                // Color for nested bars, which is handled here directly since they have specific names
+                getEl('nestedBarHomeTotal').style.backgroundColor = '#555'; // Fixed grey for outer bar
+                getEl('nestedBarAwayTotal').style.backgroundColor = '#555'; // Fixed grey for outer bar
+
+                if (homeSuccessful > awaySuccessful) {
+                    getEl('nestedBarHomeSuccessful').style.backgroundColor = '#e31b23'; // Red for winning inner bar
+                    getEl('nestedBarAwaySuccessful').style.backgroundColor = '#ffffff'; // White for losing inner bar
+                } else if (awaySuccessful > homeSuccessful) {
+                    getEl('nestedBarHomeSuccessful').style.backgroundColor = '#ffffff'; // White for losing inner bar
+                    getEl('nestedBarAwaySuccessful').style.backgroundColor = '#e31b23'; // Red for winning inner bar
+                } else { // homeSuccessful == awaySuccessful
+                    getEl('nestedBarHomeSuccessful').style.backgroundColor = '#ffffff'; // White
+                    getEl('nestedBarAwaySuccessful').style.backgroundColor = '#ffffff'; // White
+                }
+
+            } else { // Normal bars (instance 1, 2, 4)
+                getEl('barHomeTotal').style.width = widthHomeTotal + '%';
+                getEl('barAwayTotal').style.width = widthAwayTotal + '%';
+                getEl('barHomeSuccessful').style.width = widthHomeSuccessful + '%';
+                getEl('barAwaySuccessful').style.width = widthAwaySuccessful + '%';
+            }
+            getEl('barHomePercentage').style.width = widthHomePercentage + '%'; // New width application
+            getEl('barAwayPercentage').style.width = widthAwayPercentage + '%'; // New width application
+        }
+
+        // Function to generate simulator HTML with unique IDs and a title
+        function generateSimulator(instanceId, title) {
+            const nestedBarHtml = `
+                    <div class="stat-row">
+                        <div class="stat-title">Pokusy</div> <!-- Changed from Efektivita to Pokusy -->
+                        <div class="numbers">
+                            <span id="displayHomeComposite${instanceId}">0</span>
+                            <span id="displayAwayComposite${instanceId}">0</span>
+                        </div>
+                        <div class="bar-container nested-bar-container">
+                            <div class="bar-bg"></div> <!-- Added bar-bg -->
+                            <div class="bar-segment left nested-bar-segment">
+                                <div class="nested-bar-outer" id="nestedBarHomeTotal${instanceId}">
+                                    <div class="nested-bar-inner" id="nestedBarHomeSuccessful${instanceId}"></div>
+                                </div>
+                            </div>
+                            <div class="bar-segment right nested-bar-segment">
+                                <div class="nested-bar-outer" id="nestedBarAwayTotal${instanceId}">
+                                    <div class="nested-bar-inner" id="nestedBarAwaySuccessful${instanceId}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+
+            const normalBarsHtml = `
+                    <div class="stat-row">
+                        <div class="stat-title">Podle celkových pokusů</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomeComposite${instanceId}">0</span>
+                            <span id="displayAwayComposite${instanceId}">0</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomeTotal${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwayTotal${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-title">Podle úspěšných pokusů</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomeSuccessfulValue${instanceId}">0</span>
+                            <span id="displayAwaySuccessfulValue${instanceId}">0</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomeSuccessful${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwaySuccessful${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+
+            return `
+                <div class="simulator-instance">
+                    <h2 class="simulator-title">${title} <!-- Added title here -->
+                        ${instanceId === '2' ? `
+                        <span class="info-icon">i
+                            <span class="tooltip-text">Tento simulátor používá nelineární 'Hype' škálování (Power Law) pro zobrazení dominance. Hodnoty jsou umocněny (na druhou), aby se opticky zvýraznila převaha, i když je reálně menší. Např. poměr 11:9 (55% ku 45%) se vizuálně vykreslí jako 60% ku 40%.</span>
+                        </span>
+                        ` : ''}
+                        ${instanceId === '3' ? `
+                        <span class="info-icon">i
+                            <span class="tooltip-text">Vnořená efektivita zobrazuje celkový počet pokusů jako tmavší podkladový pruh a úspěšné pokusy jako jasnější, barevný pruh vnořený uvnitř. Vizualizuje poměr úspěšnosti k celkovému počtu pokusů.</span>
+                        </span>
+                        ` : ''}
+                        ${instanceId === '4' ? `
+                        <span class="info-icon">i
+                            <span class="tooltip-text">Logaritmické škálování je vhodné pro statistiky s velkými rozdíly. I malé hodnoty dostanou viditelný pruh, zatímco obrovské hodnoty nepřesáhnou obrazovku. Používá se logaritmus hodnoty.</span>
+                        </span>
+                        ` : ''}
+                    </h2>
+                    <div class="controls">
+                        <div class="team-inputs">
+                            <h3>Home Team</h3>
+                            <div class="input-group">
+                                <label for="homeSuccessful${instanceId}">Successful:</label>
+                                <input type="number" id="homeSuccessful${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                            <div class="input-group">
+                                <label for="homeTotal${instanceId}">Total:</label>
+                                <input type="number" id="homeTotal${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                        </div>
+
+                        <div class="team-inputs">
+                            <h3>Away Team</h3>
+                            <div class="input-group">
+                                <label for="awaySuccessful${instanceId}">Successful:</label>
+                                <input type="number" id="awaySuccessful${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                            <div class="input-group">
+                                <label for="awayTotal${instanceId}">Total:</label>
+                                <input type="number" id="awayTotal${instanceId}" value="0" oninput="update('${instanceId}')">
+                            </div>
+                        </div>
+                    </div>
+
+                    ${instanceId === '3' ? nestedBarHtml : normalBarsHtml}
+
+                    <div class="stat-row">
+                        <div class="stat-title">Podle % úspěšnosti</div>
+                        
+                        <div class="numbers">
+                            <span id="displayHomePercentage${instanceId}">0%</span>
+                            <span id="displayAwayPercentage${instanceId}">0%</span>
+                        </div>
+
+                        <div class="bar-container">
+                            <div class="bar-bg"></div>
+                            <div class="bar-segment left">
+                                <div class="bar bar-home" id="barHomePercentage${instanceId}"></div>
+                            </div>
+                            <div class="bar-segment right">
+                                <div class="bar bar-away" id="barAwayPercentage${instanceId}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Init: Generate two simulators and append them
+        document.addEventListener('DOMContentLoaded', () => {
+            const appContainer = document.getElementById('app-container');
+            appContainer.innerHTML = generateSimulator('1', 'Lineární podíl z celku'); // Pass title for first instance
+            appContainer.innerHTML += generateSimulator('2', 'Nelineární "Hype" škálování (Power Law)'); // Pass new title for second instance
+            appContainer.innerHTML += generateSimulator('3', 'Vnořená efektivita (Nested bars)'); // New simulator 3 with corrected title
+            appContainer.innerHTML += generateSimulator('4', 'Logaritmické škálování'); // New simulator 4
+
+            // Initial update for all instances
+            update('1');
+            update('2');
+            update('3');
+            update('4');
+        });
+    </script>
+</body>
+</html>

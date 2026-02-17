@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrační prostředí</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f1923;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        /* --- Navigation Bar --- */
+        .navigation-bar {
+            width: 100%;
+            background-color: #1e2732;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .navigation-bar .nav-button {
+            background-color: #2c3e50; /* Darker tone */
+            color: white;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-bar .nav-button:hover {
+            background-color: #34495e;
+        }
+
+        /* --- Demo Page Specific Styles --- */
+        .demo-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .demo-container h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #e31b23;
+            text-align: center;
+        }
+
+        .stats-input-section {
+            background: #1e2732;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1200px; /* Increased max-width to allow more columns */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex; /* Changed from grid to flex */
+            flex-wrap: wrap; /* Allow items to wrap to next line */
+            justify-content: center; /* Center items if they don't fill the whole row */
+            gap: 20px; /* Space between input groups */
+        }
+
+        .stat-input-group {
+            border: 1px solid #2c3e50;
+            border-radius: 8px;
+            padding: 15px;
+            background: #0f1923;
+            flex: 1 1 calc(25% - 20px); /* Approximately 4 columns, accounting for gap */
+            min-width: 180px; /* Minimum width for each input group to prevent collapsing too much */
+            max-width: 280px; /* Max width to ensure they don't get too wide on larger screens */
+        }
+
+        .stat-input-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-row label {
+            flex-basis: 50%;
+            margin-bottom: 0;
+            font-size: 1em;
+            color: #ccc;
+        }
+
+        .input-row input[type="number"] {
+            flex-basis: 45%;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #0f1923;
+            color: white;
+            font-size: 1em;
+        }
+
+        .visualizations-section {
+            display: flex; /* Main container for two columns */
+            justify-content: center;
+            align-items: flex-start; /* Align columns to the top */
+            gap: 30px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 20px;
+        }
+
+        .visualization-column-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1 1 45%; /* Each column takes about 45% width */
+            max-width: 480px; /* Max width for each column */
+            border: 1px solid #2c3e50; /* Add border for entire column */
+            border-radius: 12px;
+            padding: 20px;
+            background: #1e2732;
+        }
+
+        .visualization-header {
+            margin-bottom: 20px; /* Space between header and first bar */
+            font-size: 1.8em;
+            color: #eee;
+            text-align: center;
+        }
+        
+        .column-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Fill parent column */
+        }
+
+        .stat-group {
+            width: 100%; /* Fill the column-content */
+            box-sizing: border-box;
+            border: none; /* Remove individual borders if column has one */
+            background: transparent; /* Remove individual background if column has one */
+            padding: 0; /* Remove individual padding if column has one */
+            margin-bottom: 20px; /* Space between stat groups */
+        }
+
+        /* Reusing existing simulator styles */
+        .stat-row {
+            width: 100%;
+            max-width: 450px; /* Adjusted max-width for columns */
+            margin-bottom: 20px;
+        }
+
+        .stat-title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .numbers {
+            display: flex;
+            justify-content: space-between; /* Keeps home-numbers and away-numbers at opposite ends */
+            margin-bottom: 15px; /* Vertical offset below the numbers, above the bar */
+            font-weight: bold;
+            font-size: 0.77em; /* Reduced by 30% from 1.1em */
+            line-height: 1.2;
+        }
+
+        .home-numbers {
+            flex: 1;
+            padding-left: 5px; /* Inner padding */
+            text-align: left; /* Keep alignment */
+        }
+
+        .away-numbers {
+            flex: 1;
+            padding-right: 5px; /* Inner padding */
+            text-align: right; /* Keep alignment */
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            height: 12px;
+            background-color: #0f1923;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #2c3e50;
+            z-index: 0;
+            border-radius: 6px;
+        }
+
+        .bar-segment {
+            height: 100%;
+            display: flex;
+            flex: 1;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .bar-segment.left {
+            justify-content: flex-end;
+            padding-right: 2px;
+        }
+        .bar-segment.right {
+            justify-content: flex-start;
+            padding-left: 2px;
+        }
+
+        .bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            z-index: 1;
+        }
+
+        .bar-home {
+            background-color: #e31b23;
+        }
+
+        .bar-away {
+            background-color: #ffffff;
+        }
+
+        /* Nested bars specific styles */
+        .nested-bar-container {
+            height: 20px;
+            background-color: transparent;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .nested-bar-outer {
+            background-color: #555;
+            height: 100%;
+            position: relative;
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .nested-bar-inner {
+            height: 100%;
+            position: absolute;
+            top: 0;
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 2;
+        }
+
+        .nested-bar-segment.left .nested-bar-outer,
+        .nested-bar-segment.left .nested-bar-inner {
+            transform-origin: right;
+            right: 0;
+            left: auto;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+        
+        .nested-bar-segment.right .nested-bar-outer,
+        .nested-bar-segment.right .nested-bar-inner {
+            transform-origin: left;
+            left: 0;
+            right: auto;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="navigation-bar">
+        <a href="index.html" class="nav-button">Hlavní stránka</a>
+        <a href="testovaci_prostredi.html" class="nav-button">Testovací prostředí</a>
+    </div>
+
+    <div class="demo-container">
+        <h1>Demonstrační prostředí</h1>
+
+        <div class="stats-input-section">
+            <!-- Inputs for each statistic type -->
+            <div class="stat-input-group">
+                <h3>Passes</h3>
+                <div class="input-row">
+                    <label for="passesHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="passesHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="passesHomeTotal">Home Total:</label>
+                    <input type="number" id="passesHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="passesAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="passesAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="passesAwayTotal">Away Total:</label>
+                    <input type="number" id="passesAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Long Passes</h3>
+                <div class="input-row">
+                    <label for="longPassesHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="longPassesHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="longPassesHomeTotal">Home Total:</label>
+                    <input type="number" id="longPassesHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="longPassesAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="longPassesAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="longPassesAwayTotal">Away Total:</label>
+                    <input type="number" id="longPassesAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Passes in Final Third</h3>
+                <div class="input-row">
+                    <label for="finalThirdHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="finalThirdHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="finalThirdHomeTotal">Home Total:</label>
+                    <input type="number" id="finalThirdHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="finalThirdAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="finalThirdAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="finalThirdAwayTotal">Away Total:</label>
+                    <input type="number" id="finalThirdAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Crosses</h3>
+                <div class="input-row">
+                    <label for="crossesHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="crossesHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="crossesHomeTotal">Home Total:</label>
+                    <input type="number" id="crossesHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="crossesAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="crossesAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="crossesAwayTotal">Away Total:</label>
+                    <input type="number" id="crossesAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Tackles</h3>
+                <div class="input-row">
+                    <label for="tacklesHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="tacklesHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="tacklesHomeTotal">Home Total:</label>
+                    <input type="number" id="tacklesHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="tacklesAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="tacklesAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="tacklesAwayTotal">Away Total:</label>
+                    <input type="number" id="tacklesAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+        </div>
+
+        <button class="prefill-button" onclick="prefillStats()">Načíst ukázková data</button>
+
+        <style>
+            .prefill-button {
+                background-color: #e31b23; /* Red theme color */
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                border-radius: 5px;
+                font-size: 1.1em;
+                cursor: pointer;
+                margin-top: 20px; /* Space from inputs */
+                transition: background-color 0.3s ease;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            }
+            .prefill-button:hover {
+                background-color: #c01a22; /* Darker red on hover */
+            }
+        </style>
+
+        <div class="visualizations-section" id="visualizationsGrid">
+            <div class="visualization-column-wrapper">
+                <h2 class="simulator-title visualization-header">Flashscore současně</h2>
+                <div id="flashscoreBarsContainer" class="column-content"></div>
+            </div>
+            <div class="visualization-column-wrapper">
+                <h2 class="simulator-title visualization-header">Demonstrace nested bars</h2>
+                <div id="nestedBarsContainer" class="column-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to generate a Flashscore-style bar visualization HTML
+        function generateFlashscoreBarHtml(statName, uniqueIdSuffix) {
+            return `
+                <div class="stat-row">
+                    <div class="stat-title">${statName}</div>
+                    <div class="numbers">
+                        <div class="home-numbers" id="displayHomeCompositeFlashscore${uniqueIdSuffix}">0%<br>(0/0)</div>
+                        <div class="away-numbers" id="displayHomeCompositeFlashscore${uniqueIdSuffix}">0%<br>(0/0)</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="bar-bg"></div>
+                        <div class="bar-segment left">
+                            <div class="bar bar-home" id="barHomeTotalFlashscore${uniqueIdSuffix}"></div>
+                        </div>
+                        <div class="bar-segment right">
+                            <div class="bar bar-away" id="barAwayTotalFlashscore${uniqueIdSuffix}"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper function to generate a Nested Bar visualization HTML
+        function generateNestedBarHtml(statName, uniqueIdSuffix) {
+            return `
+                <div class="stat-row">
+                    <div class="stat-title">${statName}</div>
+                    <div class="numbers">
+                        <div class="home-numbers" id="displayHomeCompositeNested${uniqueIdSuffix}">0%<br>(0/0)</div>
+                        <div class="away-numbers" id="displayAwayCompositeNested${uniqueIdSuffix}">0%<br>(0/0)</div>
+                    </div>
+                    <div class="bar-container nested-bar-container">
+                        <div class="bar-bg"></div>
+                        <div class="bar-segment left nested-bar-segment">
+                            <div class="nested-bar-outer" id="nestedBarHomeTotalNested${uniqueIdSuffix}">
+                                <div class="nested-bar-inner" id="nestedBarHomeSuccessfulNested${uniqueIdSuffix}"></div>
+                            </div>
+                        </div>
+                        <div class="bar-segment right nested-bar-segment">
+                            <div class="nested-bar-outer" id="nestedBarAwayTotalNested${uniqueIdSuffix}">
+                                <div class="nested-bar-inner" id="nestedBarAwaySuccessfulNested${uniqueIdSuffix}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateDemo() {
+            const stats = [
+                { name: 'Passes', idPrefix: 'passes' },
+                { name: 'Long Passes', idPrefix: 'longPasses' },
+                { name: 'Passes in Final Third', idPrefix: 'finalThird' },
+                { name: 'Crosses', idPrefix: 'crosses' },
+                { name: 'Tackles', idPrefix: 'tackles' }
+            ];
+
+            stats.forEach(stat => {
+                const homeSuccessful = parseInt(document.getElementById(`${stat.idPrefix}HomeSuccessful`).value) || 0;
+                const homeTotal = parseInt(document.getElementById(`${stat.idPrefix}HomeTotal`).value) || 0;
+                const awaySuccessful = parseInt(document.getElementById(`${stat.idPrefix}AwaySuccessful`).value) || 0; 
+                const awayTotal = parseInt(document.getElementById(`${stat.idPrefix}AwayTotal`).value) || 0;
+
+                // Calculate percentages
+                const homePercentage = homeTotal === 0 ? 0 : Math.round((homeSuccessful / homeTotal) * 100);
+                const awayPercentage = awayTotal === 0 ? 0 : Math.round((awaySuccessful / awayTotal) * 100);
+
+                // --- Flashscore Logic (Lineární podíl z celku) ---
+                const flashscoreHomeTotalEl = document.getElementById(`barHomeTotalFlashscore${stat.idPrefix}`);
+                const flashscoreAwayTotalEl = document.getElementById(`barAwayTotalFlashscore${stat.idPrefix}`);
+                const displayHomeCompositeFlashscoreEl = document.getElementById(`displayHomeCompositeFlashscore${stat.idPrefix}`);
+                const displayAwayCompositeFlashscoreEl = document.getElementById(`displayAwayCompositeFlashscore${stat.idPrefix}`);
+
+                const totalAllAttemptsFlashscore = homeTotal + awayTotal;
+                let widthHomeTotalFlashscore = (totalAllAttemptsFlashscore === 0) ? 0 : (homeTotal / totalAllAttemptsFlashscore) * 100;
+                let widthAwayTotalFlashscore = (totalAllAttemptsFlashscore === 0) ? 0 : (awayTotal / totalAllAttemptsFlashscore) * 100;
+                
+                if (flashscoreHomeTotalEl) flashscoreHomeTotalEl.style.width = widthHomeTotalFlashscore + '%';
+                if (flashscoreAwayTotalEl) flashscoreAwayTotalEl.style.width = widthAwayTotalFlashscore + '%';
+
+                // Color logic for Flashscore bars (Total Attempts)
+                if (homeTotal > awayTotal) {
+                    if (flashscoreHomeTotalEl) flashscoreHomeTotalEl.style.backgroundColor = '#e31b23';
+                    if (flashscoreAwayTotalEl) flashscoreAwayTotalEl.style.backgroundColor = '#ffffff';
+                } else if (awayTotal > homeTotal) {
+                    if (flashscoreHomeTotalEl) flashscoreHomeTotalEl.style.backgroundColor = '#ffffff';
+                    if (flashscoreAwayTotalEl) flashscoreAwayTotalEl.style.backgroundColor = '#e31b23';
+                } else {
+                    if (flashscoreHomeTotalEl) flashscoreHomeTotalEl.style.backgroundColor = '#ffffff';
+                    if (flashscoreAwayTotalEl) flashscoreAwayTotalEl.style.backgroundColor = '#ffffff';
+                }
+                
+                // Update display values for Flashscore
+                if (displayHomeCompositeFlashscoreEl) displayHomeCompositeFlashscoreEl.innerHTML = `${homePercentage}%<br>(${homeSuccessful}/${homeTotal})`;
+                if (displayAwayCompositeFlashscoreEl) displayAwayCompositeFlashscoreEl.innerHTML = `${awayPercentage}%<br>(${awaySuccessful}/${awayTotal})`;
+
+
+                // --- Nested Bars Logic (Vnořená efektivita) ---
+                const nestedBarHomeOuterEl = document.getElementById(`nestedBarHomeTotalNested${stat.idPrefix}`);
+                const nestedBarAwayOuterEl = document.getElementById(`nestedBarAwayTotalNested${stat.idPrefix}`);
+                const nestedBarHomeInnerEl = document.getElementById(`nestedBarHomeSuccessfulNested${stat.idPrefix}`);
+                const nestedBarAwayInnerEl = document.getElementById(`nestedBarAwaySuccessfulNested${stat.idPrefix}`);
+                const displayHomeCompositeNestedEl = document.getElementById(`displayHomeCompositeNested${stat.idPrefix}`);
+                const displayAwayCompositeNestedEl = document.getElementById(`displayAwayCompositeNested${stat.idPrefix}`);
+
+
+                // Outer bar (Total Attempts) - Lineární podíl z celku (PROPORTIONAL SCALING)
+                const totalAllAttemptsNested = homeTotal + awayTotal;
+                let widthHomeTotalNested = (totalAllAttemptsNested === 0) ? 0 : (homeTotal / totalAllAttemptsNested) * 100;
+                let widthAwayTotalNested = (totalAllAttemptsNested === 0) ? 0 : (awayTotal / totalAllAttemptsNested) * 100;
+
+                // Inner bar (Successful Attempts) - Represents successful % OF THE TOTAL ATTEMPTS
+                let widthHomeSuccessfulNested = homeTotal === 0 ? 0 : (homeSuccessful / homeTotal) * 100;
+                let widthAwaySuccessfulNested = awayTotal === 0 ? 0 : (awaySuccessful / awayTotal) * 100;
+
+                // Cap widths at 100%
+                if (widthHomeTotalNested > 100) widthHomeTotalNested = 100;
+                if (widthAwayTotalNested > 100) widthAwayTotalNested = 100;
+                if (widthHomeSuccessfulNested > 100) widthHomeSuccessfulNested = 100;
+                if (widthAwaySuccessfulNested > 100) widthAwaySuccessfulNested = 100;
+
+                if (nestedBarHomeOuterEl) nestedBarHomeOuterEl.style.width = widthHomeTotalNested + '%';
+                if (nestedBarAwayOuterEl) nestedBarAwayOuterEl.style.width = widthAwayTotalNested + '%';
+                if (nestedBarHomeInnerEl) nestedBarHomeInnerEl.style.width = widthHomeSuccessfulNested + '%';
+                if (nestedBarAwayInnerEl) nestedBarAwayInnerEl.style.width = widthAwaySuccessfulNested + '%';
+
+                // Color for nested bars
+                if (nestedBarHomeOuterEl) nestedBarHomeOuterEl.style.backgroundColor = '#555'; // Fixed grey for outer bar
+                if (nestedBarAwayOuterEl) nestedBarAwayOuterEl.style.backgroundColor = '#555'; // Fixed grey for outer bar
+
+                if (homeSuccessful > awaySuccessful) {
+                    if (nestedBarHomeInnerEl) nestedBarHomeInnerEl.style.backgroundColor = '#e31b23'; // Red for winning inner bar
+                    if (nestedBarAwayInnerEl) nestedBarAwayInnerEl.style.backgroundColor = '#ffffff'; // White for losing inner bar
+                } else if (awaySuccessful > homeSuccessful) {
+                    if (nestedBarHomeInnerEl) nestedBarHomeInnerEl.style.backgroundColor = '#ffffff'; // White for losing inner bar
+                    if (nestedBarAwayInnerEl) nestedBarAwayInnerEl.style.backgroundColor = '#e31b23'; // Red for winning inner bar
+                } else {
+                    if (nestedBarHomeInnerEl) nestedBarHomeInnerEl.style.backgroundColor = '#ffffff'; // White
+                    if (nestedBarAwayInnerEl) nestedBarAwayInnerEl.style.backgroundColor = '#ffffff'; // White
+                }
+
+                // Update display values for Nested bars
+                if (displayHomeCompositeNestedEl) displayHomeCompositeNestedEl.innerHTML = `${homePercentage}%<br>(${homeSuccessful}/${homeTotal})`;
+                if (displayAwayCompositeNestedEl) displayAwayCompositeNestedEl.innerHTML = `${awayPercentage}%<br>(${awaySuccessful}/${awayTotal})`;
+            });
+        }
+
+        function prefillStats() {
+            const data = {
+                passes: { homeSuccessful: 71, homeTotal: 165, awaySuccessful: 390, awayTotal: 480 },
+                longPasses: { homeSuccessful: 10, homeTotal: 60, awaySuccessful: 40, awayTotal: 88 },
+                finalThird: { homeSuccessful: 28, homeTotal: 95, awaySuccessful: 121, awayTotal: 161 },
+                crosses: { homeSuccessful: 4, homeTotal: 13, awaySuccessful: 9, awayTotal: 32 },
+                tackles: { homeSuccessful: 9, homeTotal: 18, awaySuccessful: 9, awayTotal: 11 }
+            };
+
+            for (const statPrefix in data) {
+                if (data.hasOwnProperty(statPrefix)) {
+                    const values = data[statPrefix];
+                    document.getElementById(`${statPrefix}HomeSuccessful`).value = values.homeSuccessful;
+                    document.getElementById(`${statPrefix}HomeTotal`).value = values.homeTotal;
+                    document.getElementById(`${statPrefix}AwaySuccessful`).value = values.awaySuccessful;
+                    document.getElementById(`${statPrefix}AwayTotal`).value = values.awayTotal;
+                }
+            }
+            updateDemo(); // Update visualizations after pre-filling
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const visualizationsGrid = document.getElementById('visualizationsGrid'); // Target the main visualizations grid
+
+            const statsDefinitions = [
+                { name: 'Passes', idPrefix: 'passes' },
+                { name: 'Long Passes', idPrefix: 'longPasses' },
+                { name: 'Passes in Final Third', idPrefix: 'finalThird' },
+                { name: 'Crosses', idPrefix: 'crosses' },
+                { name: 'Tackles', idPrefix: 'tackles' }
+            ];
+
+            const flashscoreBarsContainer = document.getElementById('flashscoreBarsContainer');
+            const nestedBarsContainer = document.getElementById('nestedBarsContainer');
+
+            statsDefinitions.forEach(stat => {
+                // Flashscore Stat Group
+                const flashscoreStatGroup = document.createElement('div');
+                flashscoreStatGroup.id = `flashscoreGroup${stat.idPrefix}`; // e.g. flashscoreGrouppasses
+                flashscoreStatGroup.className = 'stat-group';
+                flashscoreStatGroup.innerHTML = generateFlashscoreBarHtml(stat.name, stat.idPrefix);
+                flashscoreBarsContainer.appendChild(flashscoreStatGroup); // Append to dedicated container
+
+                // Nested Stat Group
+                const nestedStatGroup = document.createElement('div');
+                nestedStatGroup.id = `nestedGroup${stat.idPrefix}`; // e.g. nestedGrouppasses
+                nestedStatGroup.className = 'stat-group';
+                nestedStatGroup.innerHTML = generateNestedBarHtml(stat.name, stat.idPrefix);
+                nestedBarsContainer.appendChild(nestedStatGroup); // Append to dedicated container
+            });
+            
+            updateDemo(); // Initial update
+        });
+    </script>
+</body>
+</html>
