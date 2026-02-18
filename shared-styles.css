@@ -1,0 +1,192 @@
+/* Shared Styles for Statistics Visualization Tool */
+
+/* --- Base Stat Row Layout --- */
+.stat-row {
+    width: 100%;
+    max-width: 640px;
+    margin-bottom: 5px; /* Reduced from 20px for a very compact layout */
+}
+
+.stat-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 1px; /* Reduced from 8px */
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+}
+
+/* --- Numbers Display --- */
+.numbers {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 0.77em;
+    line-height: 1.2;
+}
+
+.home-numbers {
+    flex: 1;
+    padding-left: 5px;
+    text-align: left;
+}
+
+.away-numbers {
+    flex: 1;
+    padding-right: 5px;
+    text-align: right;
+}
+
+/* --- Bar Containers & Segments --- */
+.bar-container {
+    display: flex;
+    align-items: center;
+    height: 12px;
+    background-color: #0f1923;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.bar-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #2c3e50;
+    z-index: 0;
+    border-radius: 6px;
+}
+
+.bar-segment {
+    height: 100%;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.bar-segment.left {
+    justify-content: flex-end;
+    padding-right: 2px;
+}
+
+.bar-segment.right {
+    justify-content: flex-start;
+    padding-left: 2px;
+}
+
+.bar {
+    height: 100%;
+    transition: width 0.3s ease;
+    z-index: 1;
+}
+
+.bar-home {
+    background-color: #e31b23;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.bar-away {
+    background-color: #ffffff;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+/* --- Nested Bars Specific Styles --- */
+.nested-bar-container {
+    height: 20px;
+    background-color: transparent;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.nested-bar-outer {
+    background-color: #555;
+    height: 100%;
+    position: relative;
+    width: 0%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.nested-bar-inner {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: 0%;
+    transition: width 0.3s ease;
+    z-index: 2;
+}
+
+.nested-bar-segment.left .nested-bar-outer,
+.nested-bar-segment.left .nested-bar-inner {
+    transform-origin: right;
+    right: 0;
+    left: auto;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.nested-bar-segment.right .nested-bar-outer,
+.nested-bar-segment.right .nested-bar-inner {
+    transform-origin: left;
+    left: 0;
+    right: auto;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+/* Force same height for Flashscore bars when displayed alongside nested bars */
+.force-nested-height .bar-container {
+    height: 20px;
+}
+
+/* --- Progress Ring Styles --- */
+.ring-container {
+    display: flex;
+    flex-direction: column; /* Stack ring above numbers */
+    align-items: center;
+    gap: 2px; /* Small gap between ring and numbers */
+}
+
+.numbers.rings-layout {
+    margin-bottom: 4px; /* Increased from 1px to provide small gap */
+}
+
+.progress-ring {
+    /* Container rotation removed to keep text horizontal */
+}
+
+.progress-ring-circle-bg,
+.progress-ring-circle {
+    transform: rotate(-90deg); /* Rotate circles to start at 12 o'clock */
+    transform-origin: 50% 50%;
+}
+
+.progress-ring-circle-bg {
+    stroke: #2c3e50;
+    fill: transparent;
+}
+
+.progress-ring-circle {
+    fill: transparent;
+    transition: stroke-dashoffset 0.35s;
+    stroke-linecap: round;
+}
+
+.progress-ring-text {
+    font-size: 11px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: central;
+    /* fill is set dynamically via JS */
+}

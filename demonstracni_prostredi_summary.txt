@@ -1,0 +1,62 @@
+Sumář změn a funkčnosti v demonstracni_prostredi.html
+
+Tento soubor shrnuje provedené změny a vysvětluje, jak fungují, aby sloužil jako kontext pro budoucí úpravy.
+
+---
+
+**1. Počáteční problém: Pruhy nereagovaly, rozbité UI a chybné ID v JavaScriptu**
+*   **Popis problému:** Počáteční verze souboru `demonstracni_prostredi.html` vykazovala chybu, kdy se vizualizační pruhy neaktualizovaly na základě zadávaných hodnot. Debugováním se zjistilo, že JavaScript nemohl najít HTML elementy pruhů kvůli neshodě v ID (duplicitní prefixy v generovaných ID). UI rozložení bylo navíc nefunkční.
+*   **Řešení:**
+    *   **Opravena neshoda ID:** V JavaScriptu (konkrétně ve funkci `DOMContentLoaded` a v `updateDemo()`) byly opraveny názvy ID prvků tak, aby se dynamicky generovaná ID v HTML přesně shodovala s ID, která JavaScript hledal (`stat.idPrefix` byl předáván správně do funkcí `generateFlashscoreBarHtml` a `generateNestedBarHtml`).
+    *   **Refaktorování UI:** Celkové rozložení stránky bylo refaktorováno pomocí Flexboxu, aby se zajistilo stabilnější a předvídatelnější uspořádání prvků, zejména sekce pro zadávání statistik a sekce pro vizualizace.
+
+**2. Zarovnání UI a umístění nadpisů vizualizací**
+*   **Popis problému:** Nadpisy vizualizačních sloupců ("Flashscore současně" a "Demonstrace nested bars") byly nesprávně umístěny vedle obsahových sloupců místo nad nimi.
+*   **Řešení:** HTML struktura sekce `visualizations-section` byla upravena tak, aby každý nadpis byl logicky obsažen v `div.visualization-column-wrapper` společně s jeho příslušným obsahovým kontejnerem (`#flashscoreBarsContainer` nebo `#nestedBarsContainer`). Díky `flex-direction: column` na `visualization-column-wrapper` se nadpis a jeho obsah nyní správně skládají vertikálně.
+
+**3. Formát zobrazení statistických hodnot**
+*   **Požadavek:** Změnit formát zobrazení čísel v obou vizualizacích na:
+    ```
+    XX%
+    (Successful/Total)
+    ```
+*   **Řešení:**
+    *   Funkce `generateFlashscoreBarHtml` a `generateNestedBarHtml` byly upraveny tak, aby vytvářely strukturu pro dvourádkové zobrazení pomocí vnořených `div`ů s třídami `.home-numbers` a `.away-numbers` uvnitř `.numbers` kontejneru.
+    *   Funkce `updateDemo()` nyní vypočítává procentuální úspěšnost (`homePercentage`, `awayPercentage`) a dynamicky aktualizuje `innerHTML` těchto divů s novým formátem (`${procenta}%<br>(${uspěšné}/${celkové})`).
+    *   CSS pro `.numbers`, `.home-numbers` a `.away-numbers` bylo upraveno pro správné zarovnání (domácí vlevo, hosté vpravo) a pro dvourádkové zobrazení.
+
+**4. Opravené vertikální odsazení hodnot od pruhů**
+*   **Popis problému:** Původní pokusy o odsazení hodnot od pruhů chybně aplikovaly horizontální padding nebo špatný `margin` na nevhodné prvky, což vedlo k nezamýšlenému chování.
+*   **Řešení:**
+    *   **Vizuální pořadí HTML upraveno:** HTML struktura v `generateFlashscoreBarHtml` a `generateNestedBarHtml` byla revidována tak, aby `<div class="numbers">` (obsahující statistické hodnoty) byl vždy *před* `<div class="bar-container">` (obsahující vizuální pruh). Tím je zajištěno, že se hodnoty vždy zobrazují *nad* pruhem.
+    *   **Aplikováno `margin-bottom`:** Na třídu `.numbers` bylo aplikováno `margin-bottom: 15px;`. To vytváří vertikální mezeru pod statistickými hodnotami a nad vizuálním pruhem, čímž se správně implementuje požadované odsazení.
+    *   **Horizontální padding:** `padding-left: 5px;` a `padding-right: 5px;` byly obnoveny pro `.home-numbers` a `.away-numbers` pro jemné vnitřní horizontální odsazení.
+
+**5. Změna velikosti písma statistických hodnot**
+*   **Požadavek:** Zmenšit velikost písma statistických hodnot o 30%.
+*   **Řešení:** V CSS pro třídu `.numbers` byla vlastnost `font-size` změněna z `1.1em` na `0.77em` (1.1 * 0.70).
+
+**6. Rozložení boxů pro zadání hodnot (stats-input-section)**
+*   **Požadavek:** Změnit rozložení boxů pro zadání statistik na "4x1" (čtyři sloupce v řadě, s případným zalamováním), při zachování pořadí.
+*   **Řešení:**
+    *   CSS pro `.stats-input-section` bylo změněno z `display: grid` na `display: flex` s `flex-wrap: wrap` a `justify-content: center`.
+    *   `max-width` kontejneru `stats-input-section` bylo zvýšeno na `1200px`, aby se umožnilo více sloupců.
+    *   Pro `.stat-input-group` byla nastavena `flex: 1 1 calc(25% - 20px);` s `min-width: 180px;` a `max-width: 280px;`, což efektivně vytváří rozložení tří až čtyř sloupců, které se přirozeně zalamuje.
+
+**7. Tlačítko pro předvyplnění ukázkových dat**
+*   **Požadavek:** Přidat tlačítko, které předvyplní všechna vstupní pole definovanými ukázkovými hodnotami.
+*   **Řešení:**
+    *   Do HTML bylo přidáno tlačítko `<button class="prefill-button" onclick="prefillStats()">Načíst ukázková data</button>`.
+    *   Do CSS byly přidány styly pro třídu `.prefill-button` pro vizuální integraci s tématem stránky.
+    *   Do JavaScriptu byla přidána funkce `prefillStats()`, která obsahuje definované ukázkové hodnoty a iteruje přes ně, aby vyplnila příslušná vstupní pole a následně zavolala `updateDemo()` pro aktualizaci vizualizací.
+
+---
+**Aktuální stav:**
+*   `demonstracni_prostredi.html` by nyní měl mít všechny tyto implementované změny.
+*   Hodnoty statistik jsou zobrazovány *nad* pruhy v požadovaném formátu s odpovídajícím vertikálním odsazením a zmenšenou velikostí písma.
+*   Rozložení vstupních boxů je flexibilní (aktuálně 3x2).
+*   Tlačítko pro načtení ukázkových dat funguje a automaticky aktualizuje vizualizace.
+
+---
+**Následující kroky:**
+Prosím, ověřte funkčnost a vzhled stránky v prohlížeči.

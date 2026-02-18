@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstrační prostředí - tenis</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f1923;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        /* --- Navigation Bar --- */
+        .navigation-bar {
+            width: 100%;
+            background-color: #1e2732;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .navigation-bar .nav-button {
+            background-color: #2c3e50; /* Darker tone */
+            color: white;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-bar .nav-button:hover {
+            background-color: #34495e;
+        }
+
+        /* --- Demo Page Specific Layout --- */
+        .demo-container {
+            width: 100%;
+            max-width: 1350px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .demo-container h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #e31b23;
+            text-align: center;
+        }
+
+        .stats-input-section {
+            background: #1e2732;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .stat-input-group {
+            border: 1px solid #2c3e50;
+            border-radius: 8px;
+            padding: 15px;
+            background: #0f1923;
+            flex: 1 1 calc(25% - 20px);
+            min-width: 180px;
+            max-width: 280px;
+        }
+
+        .stat-input-group h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #ccc;
+            text-align: center;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-row label {
+            flex-basis: 50%;
+            margin-bottom: 0;
+            font-size: 1em;
+            color: #ccc;
+        }
+
+        .input-row input[type="number"] {
+            flex-basis: 45%;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #0f1923;
+            color: white;
+            font-size: 1em;
+        }
+
+        .visualizations-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            justify-items: center;
+            align-items: flex-start;
+            gap: 50px;
+            width: 100%;
+            max-width: 1350px;
+            margin-top: 20px;
+        }
+
+        .visualization-column-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 620px;
+            border: 1px solid #2c3e50;
+            border-radius: 12px;
+            padding: 20px;
+            background: #1e2732;
+        }
+
+        .visualization-column-wrapper.full-width {
+            grid-column: 1 / span 2;
+        }
+
+        .visualization-header {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #eee;
+            text-align: center;
+        }
+        
+        .column-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .stat-group {
+            width: 100%;
+            box-sizing: border-box;
+            background: transparent;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .prefill-button {
+            background-color: #e31b23;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .prefill-button:hover {
+            background-color: #c01a22;
+        }
+    </style>
+</head>
+<body>
+    <div class="navigation-bar">
+        <a href="index.html" class="nav-button">Hlavní stránka</a>
+        <a href="testovaci_prostredi.html" class="nav-button">Testovací prostředí</a>
+        <a href="demonstracni_prostredi_fotbal.html" class="nav-button">Demonstrační prostředí - fotbal</a>
+        <a href="demonstracni_prostredi_basketbal.html" class="nav-button">Demonstrační prostředí - basketbal</a>
+    </div>
+
+    <div class="demo-container">
+        <h1>Demonstrační prostředí - tenis</h1>
+
+        <div class="stats-input-section">
+            <div class="stat-input-group">
+                <h3>1st Serve Points Won</h3>
+                <div class="input-row">
+                    <label for="firstServeHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="firstServeHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="firstServeHomeTotal">Home Total:</label>
+                    <input type="number" id="firstServeHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="firstServeAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="firstServeAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="firstServeAwayTotal">Away Total:</label>
+                    <input type="number" id="firstServeAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>2nd Serve Points Won</h3>
+                <div class="input-row">
+                    <label for="secondServeHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="secondServeHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="secondServeHomeTotal">Home Total:</label>
+                    <input type="number" id="secondServeHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="secondServeAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="secondServeAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="secondServeAwayTotal">Away Total:</label>
+                    <input type="number" id="secondServeAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Break Points Saved</h3>
+                <div class="input-row">
+                    <label for="breakPointsSavedHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="breakPointsSavedHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="breakPointsSavedHomeTotal">Home Total:</label>
+                    <input type="number" id="breakPointsSavedHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="breakPointsSavedAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="breakPointsSavedAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="breakPointsSavedAwayTotal">Away Total:</label>
+                    <input type="number" id="breakPointsSavedAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Return Points Won</h3>
+                <div class="input-row">
+                    <label for="returnPointsHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="returnPointsHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="returnPointsHomeTotal">Home Total:</label>
+                    <input type="number" id="returnPointsHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="returnPointsAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="returnPointsAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="returnPointsAwayTotal">Away Total:</label>
+                    <input type="number" id="returnPointsAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+
+            <div class="stat-input-group">
+                <h3>Total Points Won</h3>
+                <div class="input-row">
+                    <label for="totalPointsHomeSuccessful">Home Successful:</label>
+                    <input type="number" id="totalPointsHomeSuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="totalPointsHomeTotal">Home Total:</label>
+                    <input type="number" id="totalPointsHomeTotal" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="totalPointsAwaySuccessful">Away Successful:</label>
+                    <input type="number" id="totalPointsAwaySuccessful" value="0" oninput="updateDemo()">
+                </div>
+                <div class="input-row">
+                    <label for="totalPointsAwayTotal">Away Total:</label>
+                    <input type="number" id="totalPointsAwayTotal" value="0" oninput="updateDemo()">
+                </div>
+            </div>
+        </div>
+
+        <div class="prefill-buttons-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; margin-bottom: 20px;">
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="prefill-button" onclick="prefillStats('kecmanovicBelluci')">Kecmanovic - Belluci</button>
+                <div class="match-link-container" style="text-align: center; margin-top: 10px;">
+                    <a id="matchLink" href="https://www.flashscore.com/match/tennis/bellucci-mattia-M9pojLqi/kecmanovic-miomir-MTQ5CPOR/summary/stats/overall/?mid=Cb1uFtBt" target="_blank" style="color: #e31b23; text-decoration: none; font-size: 0.9em;">link</a>
+                </div>
+            </div>
+            
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="prefill-button" onclick="prefillStats('alcarazDjokovic')">Alcaraz - Djokovic</button>
+                <div class="match-link-container" style="text-align: center; margin-top: 10px;">
+                    <a href="https://www.flashscore.com/match/tennis/alcaraz-garfia-carlos-UkhgIFEq/djokovic-novak-AZg49Et9/summary/stats/overall/?mid=ETnUIkem" target="_blank" style="color: #e31b23; text-decoration: none; font-size: 0.9em;">link</a>
+                </div>
+            </div>
+
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="prefill-button" onclick="prefillStats('agamenoneJusto')">Agamenone - Justo</button>
+                <div class="match-link-container" style="text-align: center; margin-top: 10px;">
+                    <a href="https://www.flashscore.com/match/tennis/agamenone-franco-E9dx5gGD/justo-guido-ivan-CjaTkiTr/summary/stats/overall/?mid=zieKZyQQ" target="_blank" style="color: #e31b23; text-decoration: none; font-size: 0.9em;">link</a>
+                </div>
+            </div>
+
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="prefill-button" style="background-color: #555;" onclick="prefillStats('extremeDemo')">Demonstrace extrému</button>
+                <div class="match-link-container" style="text-align: center; margin-top: 10px;">
+                    <span style="color: #888; font-size: 0.8em;">Klinická efektivita</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="visualizations-section" id="visualizationsGrid">
+            <div class="visualization-column-wrapper">
+                <h2 class="simulator-title visualization-header">Flashscore současně</h2>
+                <div id="flashscoreBarsContainer" class="column-content force-nested-height"></div>
+            </div>
+            <div class="visualization-column-wrapper">
+                <h2 class="simulator-title visualization-header">Demonstrace nested bars</h2>
+                <div id="nestedBarsContainer" class="column-content"></div>
+            </div>
+            <div class="visualization-column-wrapper full-width">
+                <h2 class="simulator-title visualization-header">Demonstrace nested bars + rings</h2>
+                <div id="nestedBarsWithRingsContainer" class="column-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared-logic.js"></script>
+    <script>
+        function updateDemo() {
+            const stats = [
+                { name: '1st Serve Points Won', idPrefix: 'firstServe' },
+                { name: '2nd Serve Points Won', idPrefix: 'secondServe' },
+                { name: 'Break Points Saved', idPrefix: 'breakPointsSaved' },
+                { name: 'Return Points Won', idPrefix: 'returnPoints' },
+                { name: 'Total Points Won', idPrefix: 'totalPoints' }
+            ];
+
+            stats.forEach(stat => {
+                const homeSuccessful = parseInt(document.getElementById(`${stat.idPrefix}HomeSuccessful`).value) || 0;
+                const homeTotal = parseInt(document.getElementById(`${stat.idPrefix}HomeTotal`).value) || 0;
+                const awaySuccessful = parseInt(document.getElementById(`${stat.idPrefix}AwaySuccessful`).value) || 0; 
+                const awayTotal = parseInt(document.getElementById(`${stat.idPrefix}AwayTotal`).value) || 0;
+
+                StatsUtils.updateFlashscoreBars(stat.idPrefix, homeSuccessful, homeTotal, awaySuccessful, awayTotal);
+                StatsUtils.updateNestedBars(stat.idPrefix, homeSuccessful, homeTotal, awaySuccessful, awayTotal);
+                StatsUtils.updateNestedBarsWithRings(stat.idPrefix, homeSuccessful, homeTotal, awaySuccessful, awayTotal);
+            });
+        }
+
+        function prefillStats(matchKey) {
+            const allMatchData = {
+                'kecmanovicBelluci': {
+                    link: "https://www.flashscore.com/match/tennis/bellucci-mattia-M9pojLqi/kecmanovic-miomir-MTQ5CPOR/summary/stats/overall/?mid=Cb1uFtBt",
+                    data: {
+                        firstServe: { homeSuccessful: 23, homeTotal: 27, awaySuccessful: 18, awayTotal: 29 },
+                        secondServe: { homeSuccessful: 13, homeTotal: 15, awaySuccessful: 8, awayTotal: 20 },
+                        breakPointsSaved: { homeSuccessful: 0, homeTotal: 0, awaySuccessful: 1, awayTotal: 4 },
+                        returnPoints: { homeSuccessful: 23, homeTotal: 49, awaySuccessful: 6, awayTotal: 42 },
+                        totalPoints: { homeSuccessful: 59, homeTotal: 91, awaySuccessful: 32, awayTotal: 91 }
+                    }
+                },
+                'alcarazDjokovic': {
+                    link: "https://www.flashscore.com/match/tennis/alcaraz-garfia-carlos-UkhgIFEq/djokovic-novak-AZg49Et9/summary/stats/overall/?mid=ETnUIkem",
+                    data: {
+                        firstServe: { homeSuccessful: 51, homeTotal: 66, awaySuccessful: 56, awayTotal: 85 },
+                        secondServe: { homeSuccessful: 20, homeTotal: 35, awaySuccessful: 20, awayTotal: 38 },
+                        breakPointsSaved: { homeSuccessful: 4, homeTotal: 6, awaySuccessful: 11, awayTotal: 16 },
+                        returnPoints: { homeSuccessful: 47, homeTotal: 123, awaySuccessful: 30, awayTotal: 101 },
+                        totalPoints: { homeSuccessful: 118, homeTotal: 224, awaySuccessful: 106, awayTotal: 224 }
+                    }
+                },
+                'agamenoneJusto': {
+                    link: "https://www.flashscore.com/match/tennis/agamenone-franco-E9dx5gGD/justo-guido-ivan-CjaTkiTr/summary/stats/overall/?mid=zieKZyQQ",
+                    data: {
+                        firstServe: { homeSuccessful: 14, homeTotal: 32, awaySuccessful: 17, awayTotal: 29 },
+                        secondServe: { homeSuccessful: 8, homeTotal: 25, awaySuccessful: 12, awayTotal: 16 },
+                        breakPointsSaved: { homeSuccessful: 4, homeTotal: 10, awaySuccessful: 4, awayTotal: 6 },
+                        returnPoints: { homeSuccessful: 16, homeTotal: 45, awaySuccessful: 35, awayTotal: 57 },
+                        totalPoints: { homeSuccessful: 38, homeTotal: 102, awaySuccessful: 61, awayTotal: 102 }
+                    }
+                },
+                'extremeDemo': {
+                    link: "#",
+                    data: {
+                        firstServe: { homeSuccessful: 10, homeTotal: 60, awaySuccessful: 25, awayTotal: 30 },
+                        secondServe: { homeSuccessful: 5, homeTotal: 40, awaySuccessful: 18, awayTotal: 22 },
+                        breakPointsSaved: { homeSuccessful: 1, homeTotal: 18, awaySuccessful: 3, awayTotal: 3 },
+                        returnPoints: { homeSuccessful: 15, homeTotal: 110, awaySuccessful: 30, awayTotal: 50 },
+                        totalPoints: { homeSuccessful: 50, homeTotal: 250, awaySuccessful: 80, awayTotal: 120 }
+                    }
+                }
+            };
+
+            const selectedMatch = allMatchData[matchKey];
+            if (!selectedMatch) return;
+
+            const dataToPrefill = selectedMatch.data;
+            for (const statPrefix in dataToPrefill) {
+                const values = dataToPrefill[statPrefix];
+                document.getElementById(`${statPrefix}HomeSuccessful`).value = values.homeSuccessful;
+                document.getElementById(`${statPrefix}HomeTotal`).value = values.homeTotal;
+                document.getElementById(`${statPrefix}AwaySuccessful`).value = values.awaySuccessful;
+                document.getElementById(`${statPrefix}AwayTotal`).value = values.awayTotal;
+            }
+            const matchLinkElement = document.getElementById('matchLink');
+            if (matchLinkElement) matchLinkElement.href = selectedMatch.link;
+
+            updateDemo();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const statsDefinitions = [
+                { name: '1st Serve Points Won', idPrefix: 'firstServe' },
+                { name: '2nd Serve Points Won', idPrefix: 'secondServe' },
+                { name: 'Break Points Saved', idPrefix: 'breakPointsSaved' },
+                { name: 'Return Points Won', idPrefix: 'returnPoints' },
+                { name: 'Total Points Won', idPrefix: 'totalPoints' }
+            ];
+
+            const flashscoreBarsContainer = document.getElementById('flashscoreBarsContainer');
+            const nestedBarsContainer = document.getElementById('nestedBarsContainer');
+            const nestedBarsWithRingsContainer = document.getElementById('nestedBarsWithRingsContainer');
+
+            statsDefinitions.forEach(stat => {
+                const flashscoreStatGroup = document.createElement('div');
+                flashscoreStatGroup.className = 'stat-group';
+                flashscoreStatGroup.innerHTML = StatsUtils.generateFlashscoreBarHtml(stat.name, stat.idPrefix);
+                flashscoreBarsContainer.appendChild(flashscoreStatGroup);
+
+                const nestedStatGroup = document.createElement('div');
+                nestedStatGroup.className = 'stat-group';
+                nestedStatGroup.innerHTML = StatsUtils.generateNestedBarHtml(stat.name, stat.idPrefix);
+                nestedBarsContainer.appendChild(nestedStatGroup);
+
+                const nestedWithRingsStatGroup = document.createElement('div');
+                nestedWithRingsStatGroup.className = 'stat-group';
+                nestedWithRingsStatGroup.innerHTML = StatsUtils.generateNestedBarWithRingsHtml(stat.name, stat.idPrefix);
+                nestedBarsWithRingsContainer.appendChild(nestedWithRingsStatGroup);
+            });
+            
+            updateDemo();
+        });
+    </script>
+</body>
+</html>
