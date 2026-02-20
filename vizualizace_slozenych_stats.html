@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vizualizace složených stats</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f1923;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        .navigation-bar {
+            width: 100%;
+            background-color: #1e2732;
+            padding: 10px 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .navigation-bar .nav-button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .navigation-bar .nav-button:hover { background-color: #34495e; }
+
+        .container {
+            width: 100%;
+            max-width: 1350px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            color: #e31b23;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* --- Stats Study Block --- */
+        .stats-study-block {
+            background: #1e2732;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 50px;
+            border: 1px solid #2c3e50;
+        }
+
+        .stats-study-header {
+            font-size: 1.8em;
+            border-bottom: 2px solid #e31b23;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* --- Input Section --- */
+        .inputs-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+            background: #0f1923;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .team-inputs h3 {
+            margin-top: 0;
+            color: #aaa;
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* --- Comparison Grid --- */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: flex-start;
+        }
+
+        .column-title {
+            font-size: 1.2em;
+            color: #eee;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .study-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .study-bar-label {
+            font-size: 0.7em;
+            color: #888;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- Finishing Bricks (now Signal Bars) --- */
+        .finishing-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .team-finishing {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .signal-bars {
+            display: flex;
+            align-items: flex-end; /* Align bars to bottom */
+            gap: 6px;
+            height: 60px; /* Fixed height for the area */
+        }
+        .brick {
+            width: 55px;
+            background-color: #2c3e50;
+            border-radius: 4px 4px 2px 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65em;
+            font-weight: bold;
+            color: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+        /* Individual heights for rising effect */
+        [id$="Low"] { height: 18px; }
+        [id$="Fair"] { height: 30px; }
+        [id$="Good"] { height: 42px; }
+        [id$="High"] { height: 55px; }
+
+        .brick.active-low { background-color: #ffcccb; color: #900; }
+        .brick.active-fair { background-color: #ffffba; color: #990; }
+        .brick.active-good { background-color: #baffc9; color: #060; }
+        .brick.active-high { background-color: #1e3a8a; color: white; }
+    </style>
+</head>
+<body>
+    <div class="navigation-bar">
+        <a href="index.html" class="nav-button">Hlavní stránka</a>
+        <a href="testovaci_prostredi.html" class="nav-button">Testovací prostředí</a>
+        <a href="demonstracni_prostredi_fotbal.html" class="nav-button">Fotbal</a>
+        <a href="demonstracni_prostredi_tenis.html" class="nav-button">Tenis</a>
+        <a href="demonstracni_prostredi_basketbal.html" class="nav-button">Basketbal</a>
+        <a href="vizualizace_slozenych_stats.html" class="nav-button">Vizualizace složených stats</a>
+    </div>
+
+    <div class="container">
+        <h1>Vizualizace složených stats</h1>
+        
+        <div class="prefill-buttons-container" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px;">
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="nav-button" style="background-color: #e31b23;" onclick="prefillStats('spartaZlin')">Zlín - Sparta</button>
+                <div style="margin-top: 5px;">
+                    <a href="https://www.flashscore.com/match/football/sparta-prague-6qA358jH/zlin-C09N1Ikd/summary/stats/overall/?mid=KxcQwAWA" target="_blank" style="color: #e31b23; text-decoration: none; font-size: 0.8em;">link na match</a>
+                </div>
+            </div>
+            <div class="prefill-button-group" style="text-align: center;">
+                <button class="nav-button" style="background-color: #e31b23;" onclick="prefillStats('parmaVerona')">Parma - Verona</button>
+                <div style="margin-top: 5px;">
+                    <a href="https://www.flashscore.com/match/football/parma-6DxlaxHN/verona-rJVAIaHo/summary/stats/overall/?mid=OdGmeUfC" target="_blank" style="color: #e31b23; text-decoration: none; font-size: 0.8em;">link na match</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="stats-container"></div>
+    </div>
+
+    <script src="shared-logic.js"></script>
+    <script>
+        const statsDefinitions = [
+            { name: 'Passes', id: 'passes' },
+            { name: 'Long Passes', id: 'longPasses' },
+            { name: 'Passes in Final Third', id: 'finalThird' },
+            { name: 'Crosses', id: 'crosses' },
+            { name: 'Tackles', id: 'tackles' },
+            { name: 'Chance Conversion', id: 'conversion', special: 'bricks' }
+        ];
+
+        function prefillStats(matchKey) {
+            const data = {
+                'spartaZlin': {
+                    passes: { hS: 166, hT: 249, aS: 512, aT: 591 },
+                    longPasses: { hS: 22, hT: 59, aS: 26, aT: 49 },
+                    finalThird: { hS: 27, hT: 57, aS: 141, aT: 189 },
+                    crosses: { hS: 0, hT: 3, aS: 9, aT: 26 },
+                    tackles: { hS: 10, hT: 17, aS: 6, aT: 11 },
+                    conversion: { hS: 0.28, hT: 0.00, aS: 2.18, aT: 2.76 }
+                },
+                'parmaVerona': {
+                    passes: { hS: 535, hT: 599, aS: 131, aT: 201 },
+                    longPasses: { hS: 24, hT: 44, aS: 19, aT: 53 },
+                    finalThird: { hS: 206, hT: 244, aS: 22, aT: 57 },
+                    crosses: { hS: 7, hT: 47, aS: 2, aT: 4 },
+                    tackles: { hS: 6, hT: 12, aS: 13, aT: 16 },
+                    conversion: { hS: 1.66, hT: 1.45, aS: 0.91, aT: 0.95 }
+                }
+            };
+
+            const matchData = data[matchKey];
+            if (!matchData) return;
+
+            statsDefinitions.forEach(stat => {
+                const s = matchData[stat.id];
+                if (s) {
+                    document.getElementById(`input_${stat.id}HomeSuccessful`).value = s.hS;
+                    document.getElementById(`input_${stat.id}HomeTotal`).value = s.hT;
+                    document.getElementById(`input_${stat.id}AwaySuccessful`).value = s.aS;
+                    document.getElementById(`input_${stat.id}AwayTotal`).value = s.aT;
+                    updateStudy(stat.id);
+                }
+            });
+        }
+
+        function createStatBlock(stat) {
+            const isBricks = stat.special === 'bricks';
+            const label1 = isBricks ? 'xG (Positions):' : 'Successful (Made):';
+            const label2 = isBricks ? 'xGOT (Finishing):' : 'Total (Attempts):';
+            
+            let visualizationHtml = `
+                <div class="comparison-grid">
+                    <div class="study-column">
+                        <div class="column-title">Flashscore současně</div>
+                        <div id="display_${stat.id}_flashscore" style="width: 100%;"></div>
+                    </div>
+                    <div class="study-column">
+                        <div class="column-title">Varianty škálování</div>
+                        <div class="study-bar-label">podle SUCCESSFUL</div>
+                        <div id="display_${stat.id}_succ" style="width: 100%;"></div>
+                        <div class="study-bar-label">podle TOTAL</div>
+                        <div id="display_${stat.id}_total" style="width: 100%;"></div>
+                        <div class="study-bar-label">podle %</div>
+                        <div id="display_${stat.id}_perc" style="width: 100%;"></div>
+                        <div class="study-bar-label" style="margin-top: 15px;">Vnořená efektivita + prstence</div>
+                        <div id="display_${stat.id}_rings" style="width: 100%;"></div>
+                    </div>
+                </div>
+            `;
+
+            if (isBricks) {
+                visualizationHtml = `
+                    <div style="background: #0f1923; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px dashed #444;">
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                            <div style="background: #e31b23; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">i</div>
+                            <div style="font-size: 0.85em; color: #ccc; line-height: 1.5;">
+                                <strong style="color: white; display: block; margin-bottom: 5px;">O čem tato vizualizace vypovídá?</strong>
+                                Tato metrika porovnává <strong>xG</strong> (očekávané góly z pozic) a <strong>xGOT</strong> (očekávané góly po zakončení). 
+                                Rozdíl mezi těmito hodnotami indikuje <strong>kvalitu zakončení</strong> (střelby).
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li><span style="color: #ffcccb;">LOW</span>: xGOT je pod 81 % xG – špatné zakončení.</li>
+                                    <li><span style="color: #ffffba;">FAIR</span>: xGOT odpovídá xG (81 % – 115 % xG) – standardní zakončení.</li>
+                                    <li><span style="color: #baffc9;">GOOD</span>: xGOT převyšuje xG (116 % – 145 % xG) – výborné zakončení.</li>
+                                    <li><span style="color: #1e3a8a; font-weight: bold;">HIGH</span>: xGOT výrazně převyšuje xG (nad 145 % xG) – výjimečné zakončení.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column-title" style="margin-top: 30px;">Finishing Quality Level</div>
+                    <div class="finishing-container">
+                        <div class="team-finishing" id="finishingHome">
+                            <div id="percentageHome" style="font-size: 1.2em; font-weight: bold; height: 30px; display: flex; align-items: center; justify-content: center;"></div>
+                            <div class="signal-bars">
+                                <div class="brick" id="brickHomeLow">LOW</div>
+                                <div class="brick" id="brickHomeFair">FAIR</div>
+                                <div class="brick" id="brickHomeGood">GOOD</div>
+                                <div class="brick" id="brickHomeHigh">HIGH</div>
+                            </div>
+                            <div style="font-size: 0.8em; margin-top: 5px; font-weight: bold; color: #aaa;">DOMÁCÍ TÝM</div>
+                        </div>
+                        <div class="team-finishing" id="finishingAway">
+                            <div id="percentageAway" style="font-size: 1.2em; font-weight: bold; height: 30px; display: flex; align-items: center; justify-content: center;"></div>
+                            <div class="signal-bars">
+                                <div class="brick" id="brickAwayLow">LOW</div>
+                                <div class="brick" id="brickAwayFair">FAIR</div>
+                                <div class="brick" id="brickAwayGood">GOOD</div>
+                                <div class="brick" id="brickAwayHigh">HIGH</div>
+                            </div>
+                            <div style="font-size: 0.8em; margin-top: 5px; font-weight: bold; color: #aaa;">HOSTUJÍCÍ TÝM</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="stats-study-block">
+                    <div class="stats-study-header">${stat.name}</div>
+                    <div class="inputs-section">
+                        <div class="team-inputs">
+                            <h3>Domácí tým</h3>
+                            <div class="input-row">
+                                <label for="input_${stat.id}HomeSuccessful">${label1}</label>
+                                <input type="number" step="0.01" id="input_${stat.id}HomeSuccessful" value="0" oninput="updateStudy('${stat.id}')">
+                            </div>
+                            <div class="input-row">
+                                <label for="input_${stat.id}HomeTotal">${label2}</label>
+                                <input type="number" step="0.01" id="input_${stat.id}HomeTotal" value="0" oninput="updateStudy('${stat.id}')">
+                            </div>
+                        </div>
+                        <div class="team-inputs">
+                            <h3>Hostující tým</h3>
+                            <div class="input-row">
+                                <label for="input_${stat.id}AwaySuccessful">${label1}</label>
+                                <input type="number" step="0.01" id="input_${stat.id}AwaySuccessful" value="0" oninput="updateStudy('${stat.id}')">
+                            </div>
+                            <div class="input-row">
+                                <label for="input_${stat.id}AwayTotal">${label2}</label>
+                                <input type="number" step="0.01" id="input_${stat.id}AwayTotal" value="0" oninput="updateStudy('${stat.id}')">
+                            </div>
+                        </div>
+                    </div>
+                    ${visualizationHtml}
+                </div>
+            `;
+        }
+
+        function updateStudy(statId) {
+            const hS = parseFloat(document.getElementById(`input_${statId}HomeSuccessful`).value) || 0;
+            const hT = parseFloat(document.getElementById(`input_${statId}HomeTotal`).value) || 0;
+            const aS = parseFloat(document.getElementById(`input_${statId}AwaySuccessful`).value) || 0;
+            const aT = parseFloat(document.getElementById(`input_${statId}AwayTotal`).value) || 0;
+
+            const statDef = statsDefinitions.find(s => s.id === statId);
+            if (statDef && statDef.special === 'bricks') {
+                updateBricks('Home', hS, hT);
+                updateBricks('Away', aS, aT);
+                return;
+            }
+
+            StatsUtils.updateFlashscoreBars(statId + '_fs', hS, hT, aS, aT);
+            updateVariant(statId + '_succ', 'succ', hS, aS, hS, hT, aS, aT);
+            updateVariant(statId + '_total', 'total', hT, aT, hS, hT, aS, aT);
+            const hP = hT === 0 ? 0 : (hS / hT) * 100;
+            const aP = aT === 0 ? 0 : (aS / aT) * 100;
+            updateVariant(statId + '_perc', 'perc', hP, aP, hS, hT, aS, aT);
+            StatsUtils.updateNestedBarsWithRings(statId + '_rings', hS, hT, aS, aT);
+        }
+
+        function updateBricks(team, xG, xGOT) {
+            const bricks = ['High', 'Good', 'Fair', 'Low'];
+            bricks.forEach(b => {
+                document.getElementById(`brick${team}${b}`).className = 'brick';
+            });
+
+            const percentageDisplay = document.getElementById(`percentage${team}`);
+            if (xG === 0) {
+                if (percentageDisplay) percentageDisplay.textContent = '';
+                return;
+            }
+
+            const ratio = xGOT / xG;
+            const diff = Math.round((ratio - 1) * 100);
+            const sign = diff > 0 ? '+' : '';
+            
+            let color = '#eee';
+            if (ratio > 1.45) {
+                color = '#60a5fa'; // Bright blue for High
+                document.getElementById(`brick${team}High`).classList.add('active-high');
+            } else if (ratio >= 1.16) {
+                color = '#baffc9'; // Green for Good
+                document.getElementById(`brick${team}Good`).classList.add('active-good');
+            } else if (ratio >= 0.81) {
+                color = '#ffffba'; // Yellow for Fair
+                document.getElementById(`brick${team}Fair`).classList.add('active-fair');
+            } else {
+                color = '#ffcccb'; // Red for Low
+                document.getElementById(`brick${team}Low`).classList.add('active-low');
+            }
+
+            if (percentageDisplay) {
+                percentageDisplay.textContent = `${sign}${diff}%`;
+                percentageDisplay.style.color = color;
+            }
+        }
+
+        function updateVariant(elementId, variantType, valH, valA, hS, hT, aS, aT) {
+            const widths = StatsUtils.calculateScaling.linear(valH, valA);
+            const barH = document.getElementById(`barHomeTotalFlashscore${elementId}`);
+            const barA = document.getElementById(`barAwayTotalFlashscore${elementId}`);
+            const lblH = document.getElementById(`labelHomeFlashscore${elementId}`);
+            const lblA = document.getElementById(`labelAwayFlashscore${elementId}`);
+            const txtH = document.getElementById(`displayHomeCompositeFlashscore${elementId}`);
+            const txtA = document.getElementById(`displayAwayCompositeFlashscore${elementId}`);
+
+            if (barH) barH.style.width = widths[0] + '%';
+            if (barA) barA.style.width = widths[1] + '%';
+            if (lblH) lblH.textContent = widths[0] > 15 ? Math.round(widths[0]) + '%' : '';
+            if (lblA) lblA.textContent = widths[1] > 15 ? Math.round(widths[1]) + '%' : '';
+
+            const finH = valH > valA ? '#e31b23' : '#ffffff';
+            const finA = valA > valH ? '#e31b23' : '#ffffff';
+            const colorH = (valH === valA) ? '#ffffff' : finH;
+            const colorA = (valH === valA) ? '#ffffff' : finA;
+
+            if (barH) {
+                barH.style.backgroundColor = colorH;
+                if (lblH) lblH.style.color = colorH === '#e31b23' ? 'white' : 'black';
+            }
+            if (barA) {
+                barA.style.backgroundColor = colorA;
+                if (lblA) lblA.style.color = colorA === '#e31b23' ? 'white' : 'black';
+            }
+
+            const hP = hT === 0 ? 0 : Math.round((hS / hT) * 100);
+            const aP = aT === 0 ? 0 : Math.round((aS / aT) * 100);
+            let lH, lA;
+            if (variantType === 'succ') {
+                lH = `${hS}<br><span style="font-weight: normal; opacity: 0.7;">of ${hT} (${hP}%)</span>`;
+                lA = `${aS}<br><span style="font-weight: normal; opacity: 0.7;">of ${aT} (${aP}%)</span>`;
+            } else if (variantType === 'total') {
+                lH = `${hT}<br><span style="font-weight: normal; opacity: 0.7;">attempts (${hS} made, ${hP}%)</span>`;
+                lA = `${aT}<br><span style="font-weight: normal; opacity: 0.7;">attempts (${aS} made, ${aP}%)</span>`;
+            } else {
+                lH = `${hP}%<br><span style="font-weight: normal; opacity: 0.7;">(${hS}/${hT})</span>`;
+                lA = `${aP}%<br><span style="font-weight: normal; opacity: 0.7;">(${aS}/${aT})</span>`;
+            }
+            if (txtH) txtH.innerHTML = lH;
+            if (txtA) txtA.innerHTML = lA;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('stats-container');
+            statsDefinitions.forEach(stat => {
+                const block = document.createElement('div');
+                block.innerHTML = createStatBlock(stat);
+                container.appendChild(block);
+                document.getElementById(`display_${stat.id}_flashscore`).innerHTML = StatsUtils.generateFlashscoreBarHtml(stat.name, stat.id + '_fs');
+                document.getElementById(`display_${stat.id}_succ`).innerHTML = StatsUtils.generateFlashscoreBarHtml('', stat.id + '_succ');
+                document.getElementById(`display_${stat.id}_total`).innerHTML = StatsUtils.generateFlashscoreBarHtml('', stat.id + '_total');
+                document.getElementById(`display_${stat.id}_perc`).innerHTML = StatsUtils.generateFlashscoreBarHtml('', stat.id + '_perc');
+                document.getElementById(`display_${stat.id}_rings`).innerHTML = StatsUtils.generateNestedBarWithRingsHtml('', stat.id + '_rings');
+                updateStudy(stat.id);
+            });
+        });
+    </script>
+</body>
+</html>

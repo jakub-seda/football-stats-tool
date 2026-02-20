@@ -4,13 +4,13 @@
 .stat-row {
     width: 100%;
     max-width: 640px;
-    margin-bottom: 5px; /* Reduced from 20px for a very compact layout */
+    margin-bottom: 5px;
 }
 
 .stat-title {
     text-align: center;
     font-weight: bold;
-    margin-bottom: 1px; /* Reduced from 8px */
+    margin-bottom: 1px;
     text-transform: uppercase;
     font-size: 0.85em;
     letter-spacing: 1px;
@@ -60,7 +60,7 @@
 .bar-segment {
     height: 100%;
     display: flex;
-    flex: 1;
+    flex: 1; /* Fixed 50/50 split */
     align-items: center;
     position: relative;
     overflow: hidden;
@@ -68,18 +68,21 @@
 
 .bar-segment.left {
     justify-content: flex-end;
-    padding-right: 2px;
+    padding-right: 2px; /* The gap at the center */
 }
 
 .bar-segment.right {
     justify-content: flex-start;
-    padding-left: 2px;
+    padding-left: 2px; /* The gap at the center */
 }
 
 .bar {
     height: 100%;
     transition: width 0.3s ease;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
 .bar-home {
@@ -94,9 +97,17 @@
     border-bottom-right-radius: 6px;
 }
 
+.bar-value-label {
+    font-size: 8px;
+    font-weight: bold;
+    padding: 0 4px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
 /* --- Nested Bars Specific Styles --- */
 .nested-bar-container {
-    height: 20px;
+    height: 12px;
     background-color: transparent;
     border-radius: 6px;
     overflow: hidden;
@@ -107,7 +118,7 @@
 .nested-bar-outer {
     background-color: #555;
     height: 100%;
-    position: relative;
+    position: absolute;
     width: 0%;
     transition: width 0.3s ease;
     display: flex;
@@ -121,26 +132,37 @@
     width: 0%;
     transition: width 0.3s ease;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
 }
 
-.nested-bar-segment.left .nested-bar-outer,
-.nested-bar-segment.left .nested-bar-inner {
-    transform-origin: right;
-    right: 0;
+.nested-bar-segment.left .nested-bar-outer {
+    right: 2px; /* Match padding for the gap */
     left: auto;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
 }
 
-.nested-bar-segment.right .nested-bar-outer,
+.nested-bar-segment.right .nested-bar-outer {
+    left: 2px; /* Match padding for the gap */
+    right: auto;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.nested-bar-segment.left .nested-bar-inner {
+    right: 0;
+    left: auto;
+    justify-content: flex-end;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
 .nested-bar-segment.right .nested-bar-inner {
-    transform-origin: left;
     left: 0;
     right: auto;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    justify-content: flex-start;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
 }
@@ -153,22 +175,18 @@
 /* --- Progress Ring Styles --- */
 .ring-container {
     display: flex;
-    flex-direction: column; /* Stack ring above numbers */
+    flex-direction: column;
     align-items: center;
-    gap: 2px; /* Small gap between ring and numbers */
+    gap: 2px;
 }
 
 .numbers.rings-layout {
-    margin-bottom: 4px; /* Increased from 1px to provide small gap */
-}
-
-.progress-ring {
-    /* Container rotation removed to keep text horizontal */
+    margin-bottom: 4px;
 }
 
 .progress-ring-circle-bg,
 .progress-ring-circle {
-    transform: rotate(-90deg); /* Rotate circles to start at 12 o'clock */
+    transform: rotate(-90deg);
     transform-origin: 50% 50%;
 }
 
@@ -188,5 +206,29 @@
     font-weight: bold;
     text-anchor: middle;
     dominant-baseline: central;
-    /* fill is set dynamically via JS */
+}
+
+/* --- Common Input Styles --- */
+.input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.input-row label {
+    flex-basis: 50%;
+    margin-bottom: 0;
+    font-size: 1em;
+    color: #ccc;
+}
+
+.input-row input[type="number"] {
+    flex-basis: 45%;
+    padding: 8px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background-color: #0f1923;
+    color: white;
+    font-size: 1em;
 }

@@ -3,9 +3,14 @@
  */
 
 const StatsUtils = {
-    /**
-     * Generates HTML for a Flashscore-style bar.
-     */
+    calculateScaling: {
+        linear(val1, val2) {
+            const total = val1 + val2;
+            if (total === 0) return [0, 0];
+            return [(val1 / total) * 100, (val2 / total) * 100];
+        }
+    },
+
     generateFlashscoreBarHtml(statName, uniqueIdSuffix) {
         return `
             <div class="stat-row">
@@ -17,19 +22,20 @@ const StatsUtils = {
                 <div class="bar-container">
                     <div class="bar-bg"></div>
                     <div class="bar-segment left">
-                        <div class="bar bar-home" id="barHomeTotalFlashscore${uniqueIdSuffix}"></div>
+                        <div class="bar bar-home" id="barHomeTotalFlashscore${uniqueIdSuffix}">
+                            <span class="bar-value-label" id="labelHomeFlashscore${uniqueIdSuffix}"></span>
+                        </div>
                     </div>
                     <div class="bar-segment right">
-                        <div class="bar bar-away" id="barAwayTotalFlashscore${uniqueIdSuffix}"></div>
+                        <div class="bar bar-away" id="barAwayTotalFlashscore${uniqueIdSuffix}">
+                            <span class="bar-value-label" id="labelAwayFlashscore${uniqueIdSuffix}"></span>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
     },
 
-    /**
-     * Generates HTML for a Nested Bar visualization.
-     */
     generateNestedBarHtml(statName, uniqueIdSuffix) {
         return `
             <div class="stat-row">
@@ -42,12 +48,16 @@ const StatsUtils = {
                     <div class="bar-bg"></div>
                     <div class="bar-segment left nested-bar-segment">
                         <div class="nested-bar-outer" id="nestedBarHomeTotalNested${uniqueIdSuffix}">
-                            <div class="nested-bar-inner" id="nestedBarHomeSuccessfulNested${uniqueIdSuffix}"></div>
+                            <div class="nested-bar-inner bar-home" id="nestedBarHomeSuccessfulNested${uniqueIdSuffix}">
+                                <span class="bar-value-label" id="labelHomeNested${uniqueIdSuffix}"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="bar-segment right nested-bar-segment">
                         <div class="nested-bar-outer" id="nestedBarAwayTotalNested${uniqueIdSuffix}">
-                            <div class="nested-bar-inner" id="nestedBarAwaySuccessfulNested${uniqueIdSuffix}"></div>
+                            <div class="nested-bar-inner bar-away" id="nestedBarAwaySuccessfulNested${uniqueIdSuffix}">
+                                <span class="bar-value-label" id="labelAwayNested${uniqueIdSuffix}"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -55,58 +65,6 @@ const StatsUtils = {
         `;
     },
 
-    /**
-     * Core calculation logic for various scaling types.
-     */
-    calculateScaling: {
-        linear(val1, val2) {
-            const total = val1 + val2;
-            if (total === 0) return [0, 0];
-            return [(val1 / total) * 100, (val2 / total) * 100];
-        },
-        hype(val1, val2, power = 2) {
-            const p1 = Math.pow(val1, power);
-            const p2 = Math.pow(val2, power);
-            return this.linear(p1, p2);
-        },
-        logarithmic(val1, val2) {
-            const l1 = Math.log(val1 + 1);
-            const l2 = Math.log(val2 + 1);
-            return this.linear(l1, l2);
-        }
-    },
-
-    /**
-     * Updates Flashscore-style bars based on successful/total attempts.
-     */
-    updateFlashscoreBars(statId, homeSuccessful, homeTotal, awaySuccessful, awayTotal) {
-        const homePercentage = homeTotal === 0 ? 0 : Math.round((homeSuccessful / homeTotal) * 100);
-        const awayPercentage = awayTotal === 0 ? 0 : Math.round((awaySuccessful / awayTotal) * 100);
-
-        const widths = this.calculateScaling.linear(homePercentage, awayPercentage);
-        
-        const homeBar = document.getElementById(`barHomeTotalFlashscore${statId}`);
-        const awayBar = document.getElementById(`barAwayTotalFlashscore${statId}`);
-        const homeText = document.getElementById(`displayHomeCompositeFlashscore${statId}`);
-        const awayText = document.getElementById(`displayAwayCompositeFlashscore${statId}`);
-
-        if (homeBar) homeBar.style.width = widths[0] + '%';
-        if (awayBar) awayBar.style.width = widths[1] + '%';
-
-        // Color logic
-        const homeColor = homePercentage > awayPercentage ? '#e31b23' : '#ffffff';
-        const awayColor = awayPercentage > homePercentage ? '#e31b23' : '#ffffff';
-        
-        if (homeBar) homeBar.style.backgroundColor = (homePercentage === awayPercentage) ? '#ffffff' : homeColor;
-        if (awayBar) awayBar.style.backgroundColor = (homePercentage === awayPercentage) ? '#ffffff' : awayColor;
-
-        if (homeText) homeText.innerHTML = `${homePercentage}%<br>(${homeSuccessful}/${homeTotal})`;
-        if (awayText) awayText.innerHTML = `${awayPercentage}%<br>(${awaySuccessful}/${awayTotal})`;
-    },
-
-    /**
-     * Generates HTML for a Nested Bar with Large Progress Rings.
-     */
     generateNestedBarWithRingsHtml(statName, uniqueIdSuffix) {
         return `
             <div class="stat-row">
@@ -118,7 +76,7 @@ const StatsUtils = {
                             <circle class="progress-ring-circle" id="ringHome${uniqueIdSuffix}" stroke-width="4" r="21" cx="24" cy="24" stroke-dasharray="131.95" stroke-dashoffset="131.95"/>
                             <text class="progress-ring-text" id="ringHome${uniqueIdSuffix}Text" x="24" y="24">0%</text>
                         </svg>
-                        <span id="displayHomeCompositeNestedRings${uniqueIdSuffix}">(0/0)</span>
+                        <div class="home-numbers" id="displayHomeCompositeNestedRings${uniqueIdSuffix}">(0/0)</div>
                     </div>
                     <div class="ring-container">
                         <svg class="progress-ring" width="48" height="48">
@@ -126,19 +84,23 @@ const StatsUtils = {
                             <circle class="progress-ring-circle" id="ringAway${uniqueIdSuffix}" stroke-width="4" r="21" cx="24" cy="24" stroke-dasharray="131.95" stroke-dashoffset="131.95"/>
                             <text class="progress-ring-text" id="ringAway${uniqueIdSuffix}Text" x="24" y="24">0%</text>
                         </svg>
-                        <span id="displayAwayCompositeNestedRings${uniqueIdSuffix}">(0/0)</span>
+                        <div class="away-numbers" id="displayAwayCompositeNestedRings${uniqueIdSuffix}">(0/0)</div>
                     </div>
                 </div>
                 <div class="bar-container nested-bar-container">
                     <div class="bar-bg"></div>
                     <div class="bar-segment left nested-bar-segment">
                         <div class="nested-bar-outer" id="nestedBarHomeTotalNestedRings${uniqueIdSuffix}">
-                            <div class="nested-bar-inner" id="nestedBarHomeSuccessfulNestedRings${uniqueIdSuffix}"></div>
+                            <div class="nested-bar-inner bar-home" id="nestedBarHomeSuccessfulNestedRings${uniqueIdSuffix}">
+                                <span class="bar-value-label" id="labelHomeNestedRings${uniqueIdSuffix}"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="bar-segment right nested-bar-segment">
                         <div class="nested-bar-outer" id="nestedBarAwayTotalNestedRings${uniqueIdSuffix}">
-                            <div class="nested-bar-inner" id="nestedBarAwaySuccessfulNestedRings${uniqueIdSuffix}"></div>
+                            <div class="nested-bar-inner bar-away" id="nestedBarAwaySuccessfulNestedRings${uniqueIdSuffix}">
+                                <span class="bar-value-label" id="labelAwayNestedRings${uniqueIdSuffix}"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -146,105 +108,117 @@ const StatsUtils = {
         `;
     },
 
-    /**
-     * Updates Nested-style bars with rings based on successful/total attempts.
-     */
-    updateNestedBarsWithRings(statId, homeSuccessful, homeTotal, awaySuccessful, awayTotal) {
-        const homePercentage = homeTotal === 0 ? 0 : (homeSuccessful / homeTotal) * 100;
-        const awayPercentage = awayTotal === 0 ? 0 : (awaySuccessful / awayTotal) * 100;
+    updateFlashscoreBars(statId, hS, hT, aS, aT) {
+        const hP = hT === 0 ? 0 : (hS / hT) * 100;
+        const aP = aT === 0 ? 0 : (aS / aT) * 100;
+        const widths = this.calculateScaling.linear(hP, aP);
+        
+        const barH = document.getElementById(`barHomeTotalFlashscore${statId}`);
+        const barA = document.getElementById(`barAwayTotalFlashscore${statId}`);
+        const lblH = document.getElementById(`labelHomeFlashscore${statId}`);
+        const lblA = document.getElementById(`labelAwayFlashscore${statId}`);
+        const txtH = document.getElementById(`displayHomeCompositeFlashscore${statId}`);
+        const txtA = document.getElementById(`displayAwayCompositeFlashscore${statId}`);
 
-        const outerWidths = this.calculateScaling.linear(homeTotal, awayTotal);
-        const homeInnerWidth = homeTotal === 0 ? 0 : (homeSuccessful / homeTotal) * 100;
-        const awayInnerWidth = awayTotal === 0 ? 0 : (awaySuccessful / awayTotal) * 100;
+        if (barH) barH.style.width = widths[0] + '%';
+        if (barA) barA.style.width = widths[1] + '%';
+        if (lblH) lblH.textContent = widths[0] > 15 ? Math.round(widths[0]) + '%' : '';
+        if (lblA) lblA.textContent = widths[1] > 15 ? Math.round(widths[1]) + '%' : '';
 
-        // Update Bars
-        const homeOuter = document.getElementById(`nestedBarHomeTotalNestedRings${statId}`);
-        const awayOuter = document.getElementById(`nestedBarAwayTotalNestedRings${statId}`);
-        const homeInner = document.getElementById(`nestedBarHomeSuccessfulNestedRings${statId}`);
-        const awayInner = document.getElementById(`nestedBarAwaySuccessfulNestedRings${statId}`);
-        const homeText = document.getElementById(`displayHomeCompositeNestedRings${statId}`);
-        const awayText = document.getElementById(`displayAwayCompositeNestedRings${statId}`);
-
-        if (homeOuter) homeOuter.style.width = outerWidths[0] + '%';
-        if (awayOuter) awayOuter.style.width = outerWidths[1] + '%';
-        if (homeInner) homeInner.style.width = homeInnerWidth + '%';
-        if (awayInner) awayInner.style.width = awayInnerWidth + '%';
-
-        // Color logic for inner bars
-        const homeColorInner = homeSuccessful > awaySuccessful ? '#e31b23' : '#ffffff';
-        const awayColorInner = awaySuccessful > homeSuccessful ? '#e31b23' : '#ffffff';
-        if (homeInner) homeInner.style.backgroundColor = (homeSuccessful === awaySuccessful) ? '#ffffff' : homeColorInner;
-        if (awayInner) awayInner.style.backgroundColor = (homeSuccessful === awaySuccessful) ? '#ffffff' : awayColorInner;
-
-        if (homeText) homeText.innerHTML = `(${homeSuccessful}/${homeTotal})`;
-        if (awayText) awayText.innerHTML = `(${awaySuccessful}/${awayTotal})`;
-
-        // Update Rings with color logic based on percentage
-        let ringHColor = '#ffffff';
-        let ringAColor = '#ffffff';
-        if (homePercentage > awayPercentage) {
-            ringHColor = '#e31b23';
-        } else if (awayPercentage > homePercentage) {
-            ringAColor = '#e31b23';
+        const hpR = Math.round(hP), apR = Math.round(aP);
+        const finH = hpR > apR ? '#e31b23' : '#ffffff';
+        const finA = apR > hpR ? '#e31b23' : '#ffffff';
+        const colorH = (hpR === apR) ? '#ffffff' : finH;
+        const colorA = (hpR === apR) ? '#ffffff' : finA;
+        
+        if (barH) {
+            barH.style.backgroundColor = colorH;
+            if (lblH) lblH.style.color = colorH === '#e31b23' ? 'white' : 'black';
         }
-
-        this.updateProgressRing('ringHome' + statId, homePercentage, ringHColor);
-        this.updateProgressRing('ringAway' + statId, awayPercentage, ringAColor);
+        if (barA) {
+            barA.style.backgroundColor = colorA;
+            if (lblA) lblA.style.color = colorA === '#e31b23' ? 'white' : 'black';
+        }
+        if (txtH) txtH.innerHTML = `${hpR}%<br>(${hS}/${hT})`;
+        if (txtA) txtA.innerHTML = `${apR}%<br>(${aS}/${aT})`;
     },
 
-    /**
-     * Updates a single progress ring based on percentage and adds text.
-     */
+    _updateNestedLogic(statId, suffix, hS, hT, aS, aT) {
+        const barH = document.getElementById(`nestedBarHomeSuccessful${suffix}${statId}`);
+        const barA = document.getElementById(`nestedBarAwaySuccessful${suffix}${statId}`);
+        const outH = document.getElementById(`nestedBarHomeTotal${suffix}${statId}`);
+        const outA = document.getElementById(`nestedBarAwayTotal${suffix}${statId}`);
+        const lblH = document.getElementById(`labelHome${suffix}${statId}`);
+        const lblA = document.getElementById(`labelAway${suffix}${statId}`);
+        const txtH = document.getElementById(`displayHomeComposite${suffix}${statId}`);
+        const txtA = document.getElementById(`displayAwayComposite${suffix}${statId}`);
+
+        const totalAttempts = hT + aT;
+        const hP = hT === 0 ? 0 : (hS / hT) * 100;
+        const aP = aT === 0 ? 0 : (aS / aT) * 100;
+        
+        const totalWidths = this.calculateScaling.linear(hT, aT);
+        const hShare = totalAttempts === 0 ? 0 : (hS / totalAttempts) * 100;
+        const aShare = totalAttempts === 0 ? 0 : (aS / totalAttempts) * 100;
+
+        if (outH) outH.style.width = totalWidths[0] + '%';
+        if (outA) outA.style.width = totalWidths[1] + '%';
+        if (barH) barH.style.width = hP + '%';
+        if (barA) barA.style.width = aP + '%';
+
+        const colorH = hS > aS ? '#e31b23' : '#ffffff';
+        const colorA = aS > hS ? '#e31b23' : '#ffffff';
+        const finH = (hS === aS) ? '#ffffff' : colorH;
+        const finA = (hS === aS) ? '#ffffff' : colorA;
+
+        if (barH) {
+            barH.style.backgroundColor = finH;
+            if (lblH) {
+                lblH.textContent = hShare > 10 ? Math.round(hShare) + '%' : '';
+                lblH.style.color = finH === '#e31b23' ? 'white' : 'black';
+            }
+        }
+        if (barA) {
+            barA.style.backgroundColor = finA;
+            if (lblA) {
+                lblA.textContent = aShare > 10 ? Math.round(aShare) + '%' : '';
+                lblA.style.color = finA === '#e31b23' ? 'white' : 'black';
+            }
+        }
+
+        if (txtH) txtH.innerHTML = `<span style="font-weight: normal; opacity: 0.7;">(${hS}/${hT})</span>`;
+        if (txtA) txtA.innerHTML = `<span style="font-weight: normal; opacity: 0.7;">(${aS}/${aT})</span>`;
+
+        return { hP: Math.round(hP), aP: Math.round(aP) };
+    },
+
+    updateNestedBars(statId, hS, hT, aS, aT) {
+        this._updateNestedLogic(statId, 'Nested', hS, hT, aS, aT);
+    },
+
+    updateNestedBarsWithRings(statId, hS, hT, aS, aT) {
+        const res = this._updateNestedLogic(statId, 'NestedRings', hS, hT, aS, aT);
+        if (!res) return;
+        let rH = res.hP > res.aP ? '#e31b23' : '#ffffff';
+        let rA = res.aP > res.hP ? '#e31b23' : '#ffffff';
+        if (res.hP === res.aP) { rH = '#ffffff'; rA = '#ffffff'; }
+        this.updateProgressRing('ringHome' + statId, res.hP, rH);
+        this.updateProgressRing('ringAway' + statId, res.aP, rA);
+    },
+
     updateProgressRing(ringId, percentage, color) {
         const circle = document.getElementById(ringId);
         const textElement = document.getElementById(ringId + 'Text');
         if (!circle) return;
-        
         const radius = circle.r.baseVal.value;
         const circumference = 2 * Math.PI * radius;
         const offset = circumference - (percentage / 100) * circumference;
-        
         circle.style.strokeDasharray = `${circumference} ${circumference}`;
         circle.style.strokeDashoffset = offset;
         circle.style.stroke = color;
-
         if (textElement) {
             textElement.textContent = `${Math.round(percentage)}%`;
             textElement.style.fill = color;
         }
-    },
-
-    /**
-     * Updates Nested-style bars based on successful/total attempts.
-     */
-    updateNestedBars(statId, homeSuccessful, homeTotal, awaySuccessful, awayTotal) {
-        const homePercentage = homeTotal === 0 ? 0 : Math.round((homeSuccessful / homeTotal) * 100);
-        const awayPercentage = awayTotal === 0 ? 0 : Math.round((awaySuccessful / awayTotal) * 100);
-
-        const outerWidths = this.calculateScaling.linear(homeTotal, awayTotal);
-        const homeInnerWidth = homeTotal === 0 ? 0 : (homeSuccessful / homeTotal) * 100;
-        const awayInnerWidth = awayTotal === 0 ? 0 : (awaySuccessful / awayTotal) * 100;
-
-        const homeOuter = document.getElementById(`nestedBarHomeTotalNested${statId}`);
-        const awayOuter = document.getElementById(`nestedBarAwayTotalNested${statId}`);
-        const homeInner = document.getElementById(`nestedBarHomeSuccessfulNested${statId}`);
-        const awayInner = document.getElementById(`nestedBarAwaySuccessfulNested${statId}`);
-        const homeText = document.getElementById(`displayHomeCompositeNested${statId}`);
-        const awayText = document.getElementById(`displayAwayCompositeNested${statId}`);
-
-        if (homeOuter) homeOuter.style.width = outerWidths[0] + '%';
-        if (awayOuter) awayOuter.style.width = outerWidths[1] + '%';
-        if (homeInner) homeInner.style.width = homeInnerWidth + '%';
-        if (awayInner) awayInner.style.width = awayInnerWidth + '%';
-
-        // Color logic for inner bars based on successful count
-        const homeColor = homeSuccessful > awaySuccessful ? '#e31b23' : '#ffffff';
-        const awayColor = awaySuccessful > homeSuccessful ? '#e31b23' : '#ffffff';
-
-        if (homeInner) homeInner.style.backgroundColor = (homeSuccessful === awaySuccessful) ? '#ffffff' : homeColor;
-        if (awayInner) awayInner.style.backgroundColor = (homeSuccessful === awaySuccessful) ? '#ffffff' : awayColor;
-
-        if (homeText) homeText.innerHTML = `${homePercentage}%<br>(${homeSuccessful}/${homeTotal})`;
-        if (awayText) awayText.innerHTML = `${awayPercentage}%<br>(${awaySuccessful}/${awayTotal})`;
     }
 };
