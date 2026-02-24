@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yellow Cards Discrepancy Dashboard</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        :root {
+            --pl-purple: #3d195b;
+            --serie-a-blue: #008fd7;
+            --laliga-red: #ee3d24;
+            --bundesliga-red: #d20222;
+            --ligue1-lime: #dae025;
+            --fotmob-green: #00e676;
+            --sofa-blue: #004682;
+            --flash-red: #e31b23;
+            --scores-blue: #003a70;
+            --scoresway-grey: #333333;
+            --pipeline-orange: #ff6d00;
+        }
+
+        body {
+            background-color: #0f1923;
+            color: white;
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 17px;
+        }
+
+        .header-nav { margin-bottom: 20px; }
+        .back-btn { color: #ccc; text-decoration: none; font-size: 0.95em; }
+
+        .player-section {
+            background: #161d25;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 60px;
+            border: 1px solid #2a3542;
+        }
+
+        .player-profile {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a3542;
+        }
+
+        .player-photo {
+            width: 110px;
+            height: 110px;
+            background: #2a3542;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #3d4959;
+            flex-shrink: 0;
+        }
+        
+        .player-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+        .player-info h1 { margin: 0 0 10px 0; font-size: 2em; }
+
+        .timeline { display: flex; gap: 12px; flex-wrap: wrap; }
+        .timeline-item {
+            background: #2a3542;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon { width: 12px; height: 16px; border-radius: 2px; }
+        .yc { background-color: #ffd700; }
+        .rc { background-color: #ff3333; }
+        .yc-rc-split { background: linear-gradient(135deg, #ffd700 50%, #ff3333 50%); }
+
+        .stats-dashboard {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-column {
+            flex: 1;
+            min-width: 450px;
+            background: #1e2732;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #2a3542;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #8899a6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-group-bubble {
+            background: #252f3a;
+            border-radius: 12px;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 15px;
+            border: 1px solid #3d4959;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .stat-group-bubble:hover {
+            transform: translateY(-2px);
+            background: #2a3542;
+        }
+
+        .bubble-values {
+            display: flex;
+            gap: 15px;
+            padding-right: 20px;
+            border-right: 1px solid #3d4959;
+            flex-shrink: 0;
+        }
+
+        .bubble-sources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .source-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #161d25;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            border: 1px solid #2a3542;
+        }
+
+        .source-tag img { width: 16px; height: 16px; border-radius: 2px; }
+
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 1.8em; font-weight: 800; display: block; }
+        .val-yc { color: #ffd700; }
+        .val-rc { color: #ff3333; }
+        .stat-label { font-size: 0.75em; color: #8899a6; text-transform: uppercase; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; }
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #2a3542;
+            font-size: 1em;
+        }
+
+        .comparison-table th { color: #8899a6; font-weight: normal; text-transform: uppercase; font-size: 0.8em; }
+
+        .logo-white-bg { background: white !important; }
+
+        .discrepancy-badge {
+            background: rgba(227, 27, 35, 0.15);
+            color: #ff3333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .note-text {
+            margin-top: auto;
+            padding-top: 20px;
+            font-size: 0.9em;
+            color: #ff3333;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-nav">
+        <a href="index.html" class="back-btn">← Zpět na rozcestník</a>
+    </div>
+
+    <!-- LADISLAV KREJČÍ -->
+    <div class="player-section">
+        <div class="player-profile">
+            <div class="player-photo">
+                <img src="https://images.fotmob.com/image_resources/playerimages/798029.png" alt="Ladislav Krejčí">
+            </div>
+            <div class="player-info">
+                <h1>Ladislav Krejčí</h1>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="card-icon yc"></div> 13.9.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 8.12.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div><div class="card-icon yc-rc-split"></div> 22.2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="dashboard-column">
+                <div class="column-title">Season stats / Profile</div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">2</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=premierleague.com"> PL</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=fotmob.com"> FotMob</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=365scores.com"> 365</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=mackolik.com"> Mackolik</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">4</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=flashscore.com"> Flashscore</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">2</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">2nd YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore</div>
+                        <div class="source-tag">Pipeline</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img class="logo-white-bg" style="background:white; padding:1px; border-radius:2px;" src="https://www.google.com/s2/favicons?domain=scoresway.com"> Scoresway</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="column-title">Týmové Stats (22.2.)</div>
+                <table class="comparison-table">
+                    <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>PL / Scoresway / Fotmob</strong> <img src="https://www.google.com/s2/favicons?domain=premierleague.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; vertical-align:middle; background:white; border-radius:2px; padding:1px;"></td>
+                            <td><strong>5:1</strong></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px; vertical-align:middle;"></td>
+                            <td><strong>5:3</strong></td>
+                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px; vertical-align:middle;"></td>
+                            <td><strong>5:2</strong></td>
+                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="note-text">⚠️ Scoresway má v team-stats 5:1, ale v PMS 5:3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YERRY MINA -->
+    <div class="player-section">
+        <div class="player-profile" style="border-left: 5px solid var(--serie-a-blue);">
+            <div class="player-photo">
+                <img src="https://images.fotmob.com/image_resources/playerimages/496042.png" alt="Yerry Mina">
+            </div>
+            <div class="player-info">
+                <h1>Yerry Mina</h1>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="card-icon yc"></div> 22.11.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 21.12.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 24.1.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div><div class="card-icon yc-rc-split"></div> 21.2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="dashboard-column">
+                <div class="column-title">Season stats / Profile</div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">3</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=fotmob.com"> FotMob</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=365scores.com"> 365</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=mackolik.com"> Mackolik</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">4</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=legaseriea.it"> Ofiko (Serie A)</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">5</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=flashscore.com"> Flashscore</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">3</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">2nd YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore</div>
+                        <div class="source-tag">Pipeline</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img class="logo-white-bg" style="background:white; padding:1px; border-radius:2px;" src="https://www.google.com/s2/favicons?domain=scoresway.com"> Scoresway</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="column-title">Týmové Stats (21.2.)</div>
+                <table class="comparison-table">
+                    <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
+                            <td><strong>1:2</strong></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
+                            <td><strong>3:2</strong></td>
+                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ofiko / 365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=legaseriea.it" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
+                            <td><strong>2:2</strong></td>
+                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- KERVIN ARRIAGA -->
+    <div class="player-section">
+        <div class="player-profile" style="border-left: 5px solid var(--laliga-red);">
+            <div class="player-photo">
+                <img src="https://images.fotmob.com/image_resources/playerimages/839750.png" alt="Kervin Arriaga">
+            </div>
+            <div class="player-info">
+                <h1>Kervin Arriaga</h1>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="card-icon yc"></div> 26.10.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 29.11.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 8.12.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div> 20.12.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div><div class="card-icon yc-rc-split"></div> 15.2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="dashboard-column">
+                <div class="column-title">Season stats / Profile</div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">4</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=fotmob.com"> FotMob</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=365scores.com"> 365</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=mackolik.com"> Mackolik</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">4</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">2nd YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=laliga.com"> Ofiko (LaLiga)</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore</div>
+                        <div class="source-tag">Pipeline</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">6</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=flashscore.com"> Flashscore</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img class="logo-white-bg" style="background:white; padding:1px; border-radius:2px;" src="https://www.google.com/s2/favicons?domain=scoresway.com"> Scoresway</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="column-title">Týmové Stats (15.2.)</div>
+                <table class="comparison-table">
+                    <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fotmob / Ofiko / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=laliga.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
+                            <td><strong>1:2</strong></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
+                            <td><strong>3:2</strong></td>
+                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
+                            <td><strong>2:2</strong></td>
+                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- OSCAR HØJLUND -->
+    <div class="player-section">
+        <div class="player-profile" style="border-left: 5px solid var(--bundesliga-red);">
+            <div class="player-photo">
+                <img src="https://images.fotmob.com/image_resources/playerimages/1336529.png" alt="Oscar Højlund">
+            </div>
+            <div class="player-info">
+                <h1>Oscar Højlund</h1>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="card-icon yc"></div> 13.12.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div><div class="card-icon yc-rc-split"></div> 6.2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="dashboard-column">
+                <div class="column-title">Season stats / Profile</div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=fotmob.com"> FotMob</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=365scores.com"> 365</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=mackolik.com"> Mackolik</div>
+                        <div class="source-tag"><img class="logo-white-bg" style="background:white; padding:1px; border-radius:2px;" src="https://www.google.com/s2/favicons?domain=scoresway.com"> Scoresway</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">2nd YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore</div>
+                        <div class="source-tag">Pipeline</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">3</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=flashscore.com"> Flashscore</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble" style="border: 1px solid #ff3333;">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val" style="color:#aaa;">0</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=bundesliga.com"> Ofiko (Bundesliga)</div>
+                        <div style="font-size:0.7em; margin-left:10px;">
+                            <span style="color:#ff3333;">⚠️ Data mismatch</span>
+                            <a href="https://www.bundesliga.com/en/bundesliga/player/oscar-hojlund" target="_blank" style="color:#008fd7; text-decoration:none; margin-left:5px;">[Zdroj]</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="column-title">Týmové Stats (6.2.)</div>
+                <table class="comparison-table">
+                    <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
+                            <td><strong>4:1</strong></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
+                            <td><strong>4:3</strong></td>
+                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
+                            <td><strong>4:2</strong></td>
+                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALEKSANDR GOLOVIN -->
+    <div class="player-section">
+        <div class="player-profile" style="border-left: 5px solid var(--ligue1-lime);">
+            <div class="player-photo">
+                <img src="https://images.fotmob.com/image_resources/playerimages/586388.png" alt="Aleksandr Golovin">
+            </div>
+            <div class="player-info">
+                <h1>Aleksandr Golovin</h1>
+                <div class="timeline">
+                    <div class="timeline-item"><div class="card-icon yc"></div> 25.10.</div>
+                    <div class="timeline-item"><div class="card-icon yc"></div><div class="card-icon yc-rc-split"></div> 13.2.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="dashboard-column">
+                <div class="column-title">Season stats / Profile</div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=fotmob.com"> FotMob</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=365scores.com"> 365</div>
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=mackolik.com"> Mackolik</div>
+                        <div class="source-tag"><img class="logo-white-bg" style="background:white; padding:1px; border-radius:2px;" src="https://www.google.com/s2/favicons?domain=scoresway.com"> Scoresway</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">2</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=ligue1.com"> Ofiko (Ligue 1)</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-yc">1</span><span class="stat-label">2nd YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore</div>
+                        <div class="source-tag">Pipeline</div>
+                    </div>
+                </div>
+                <div class="stat-group-bubble">
+                    <div class="bubble-values">
+                        <div class="stat-item"><span class="stat-val val-yc">3</span><span class="stat-label">YC</span></div>
+                        <div class="stat-item"><span class="stat-val val-rc">1</span><span class="stat-label">RC</span></div>
+                    </div>
+                    <div class="bubble-sources">
+                        <div class="source-tag"><img src="https://www.google.com/s2/favicons?domain=flashscore.com"> Flashscore</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-column">
+                <div class="column-title">Týmové Stats (13.2.)</div>
+                <table class="comparison-table">
+                    <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
+                            <td><strong>3:2</strong></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
+                            <td><strong>5:2</strong></td>
+                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ofiko / 365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=ligue1.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
+                            <td><strong>4:2</strong></td>
+                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- METHODOLOGY SUMMARY MATRIX -->
+    <div class="player-section" style="background: #1e2732; border: 1px solid var(--serie-a-blue);">
+        <h2 style="color: var(--serie-a-blue); margin-bottom: 30px; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Metodická matice: Jak zdroje interpretují 2nd YC</h2>
+        <table class="comparison-table" style="text-align: center;">
+            <thead>
+                <tr>
+                    <th style="text-align: left; font-size: 1em;">Zdroj / Liga</th>
+                    <th style="text-align: center;">Premier League</th>
+                    <th style="text-align: center;">Serie A</th>
+                    <th style="text-align: center;">LaLiga</th>
+                    <th style="text-align: center;">Bundesliga</th>
+                    <th style="text-align: center;">Ligue 1</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align: left;"><strong>Flashscore / SofaScore</strong></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;"><strong>FotMob / Scoresway</strong></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;"><strong>365Scores / Mackolik</strong></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;"><strong>Oficiální zdroj</strong></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; width: 100%; display: block; border: 1px dashed #ff3333;">Broken (0 RC)</span></td>
+                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px; font-size: 0.8em; color: #8899a6;">
+            <span><strong style="color: #ff3333;">2nd YC as 2Y:</strong> Počítá obě žluté karty do týmových statistik.</span>
+            <span><strong style="color: #00e676;">Match YCs Excluded:</strong> V zápase se 2nd YC nepočítá žádnou žlutou kartu, pouze červenou.</span>
+            <span><strong style="color: #ffd700;">Only counts 1st YC:</strong> V zápase se 2nd YC započítá pouze první žlutou kartu.</span>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; color: #8899a6; font-size: 0.85em; text-align: center; padding: 20px; border-top: 1px solid #2a3542;">
+        Data demonstrují situaci po 2nd YC. Každý zdroj používá jinou logiku pro agregaci těchto karet do sezónních statistik.
+    </div>
+</body>
+</html>
