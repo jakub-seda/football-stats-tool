@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLS Assists Analysis - 2025</title>
+    <link rel="stylesheet" href="shared-styles.css">
+    <style>
+        body {
+            background-color: #0f1923;
+            color: white;
+            font-family: -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            font-size: 17px;
+        }
+
+        .header-nav { margin-bottom: 20px; }
+        .back-btn { color: #ccc; text-decoration: none; font-size: 0.95em; }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 { color: #00e676; margin-bottom: 10px; }
+        p.subtitle { color: #8899a6; margin-bottom: 30px; }
+
+        .comparison-wrapper {
+            background: #1e2732;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a3542;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #161d25;
+            padding: 15px;
+            color: #8899a6;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #2a3542;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        th:hover {
+            background: #2a3542;
+            color: white;
+        }
+
+        th.sort-active {
+            color: #00e676;
+            border-bottom-color: #00e676;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #2a3542;
+            font-size: 0.95em;
+        }
+
+        .rank-col {
+            color: #8899a6;
+            width: 40px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+
+        .val-col {
+            text-align: center;
+            font-weight: bold;
+            width: 140px;
+        }
+
+        .source-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .source-logo {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+        }
+
+        tr:hover { background: #252f3a; }
+
+        .highlight-diff {
+            color: #ff3333;
+            font-weight: 900;
+        }
+        
+        .highlight-match {
+            color: #00e676;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-nav">
+        <a href="index.html" class="back-btn">← Zpět na rozcestník</a>
+    </div>
+
+    <div class="container">
+        <h1>MLS Assists Analysis (2025)</h1>
+        <p class="subtitle">Interaktivní srovnání dat asistencí. Kliknutím na hlavičku sloupce tabulku seřadíte.</p>
+
+        <div class="comparison-wrapper">
+            <table id="assistsTable">
+                <thead>
+                    <tr>
+                        <th class="rank-col" onclick="sortTable(0, true)">#</th>
+                        <th onclick="sortTable(1, false)">Hráč</th>
+                        <th class="val-col" onclick="sortTable(2, true)">
+                            <div class="source-header">
+                                <img class="source-logo" src="https://www.google.com/s2/favicons?domain=mlssoccer.com"> MLS Total
+                            </div>
+                        </th>
+                        <th class="val-col" onclick="sortTable(3, true)">
+                            <div class="source-header">
+                                <img class="source-logo" src="https://www.google.com/s2/favicons?domain=flashscore.cz"> Flashscore
+                            </div>
+                        </th>
+                        <th class="val-col" onclick="sortTable(4, true)">
+                            <div class="source-header">
+                                <img class="source-logo" src="https://www.google.com/s2/favicons?domain=sofascore.com"> SofaScore
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="rank-col">1</td><td><strong>Lionel Messi</strong></td><td class="val-col">28</td><td class="val-col highlight-match">28</td><td class="val-col">23</td></tr>
+                    <tr><td class="rank-col">2</td><td><strong>Anders Dreyer</strong></td><td class="val-col">21</td><td class="val-col highlight-match">21</td><td class="val-col">17</td></tr>
+                    <tr><td class="rank-col">3</td><td><strong>Martín Ojeda</strong></td><td class="val-col">15</td><td class="val-col highlight-match">15</td><td class="val-col">9</td></tr>
+                    <tr><td class="rank-col">4</td><td><strong>Philip Zinckernagel</strong></td><td class="val-col">15</td><td class="val-col highlight-diff">17</td><td class="val-col">13</td></tr>
+                    <tr><td class="rank-col">5</td><td><strong>Evander</strong></td><td class="val-col">15</td><td class="val-col highlight-diff">16</td><td class="val-col">14</td></tr>
+                    <tr><td class="rank-col">6</td><td><strong>Carles Gil</strong></td><td class="val-col">14</td><td class="val-col highlight-match">14</td><td class="val-col">9</td></tr>
+                    <tr><td class="rank-col">7</td><td><strong>Pep Biel</strong></td><td class="val-col">12</td><td class="val-col highlight-match">12</td><td class="val-col">11</td></tr>
+                    <tr><td class="rank-col">8</td><td><strong>Hany Mukhtar</strong></td><td class="val-col">12</td><td class="val-col highlight-match">12</td><td class="val-col">8</td></tr>
+                    <tr><td class="rank-col">9</td><td><strong>Albert Rusnák</strong></td><td class="val-col">11</td><td class="val-col highlight-match">11</td><td class="val-col">8</td></tr>
+                    <tr><td class="rank-col">10</td><td><strong>Emil Forsberg</strong></td><td class="val-col">11</td><td class="val-col highlight-match">11</td><td class="val-col">8</td></tr>
+                    <tr><td class="rank-col">11</td><td><strong>Hirving Lozano</strong></td><td class="val-col">11</td><td class="val-col highlight-match">11</td><td class="val-col">9</td></tr>
+                    <tr><td class="rank-col">12</td><td><strong>Wilfried Zaha</strong></td><td class="val-col">10</td><td class="val-col highlight-match">10</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">13</td><td><strong>Luis Suárez</strong></td><td class="val-col">10</td><td class="val-col highlight-diff">11</td><td class="val-col">11</td></tr>
+                    <tr><td class="rank-col">14</td><td><strong>Denis Bouanga</strong></td><td class="val-col">10</td><td class="val-col highlight-diff">9</td><td class="val-col">8</td></tr>
+                    <tr><td class="rank-col">15</td><td><strong>Luis Muriel</strong></td><td class="val-col">9</td><td class="val-col highlight-match">9</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">16</td><td><strong>Tani Oluwaseyi</strong></td><td class="val-col">8</td><td class="val-col highlight-match">8</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">17</td><td><strong>Cristian Arango</strong></td><td class="val-col">7</td><td class="val-col highlight-match">7</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">18</td><td><strong>Đorđe Mihailović</strong></td><td class="val-col">7</td><td class="val-col highlight-diff">11</td><td class="val-col">7</td></tr>
+                    <tr><td class="rank-col">19</td><td><strong>Hannes Wolf</strong></td><td class="val-col">7</td><td class="val-col highlight-diff">8</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">20</td><td><strong>Petar Musa</strong></td><td class="val-col">6</td><td class="val-col highlight-match">6</td><td class="val-col">6</td></tr>
+                    <tr><td class="rank-col">21</td><td><strong>Tomas Segovia</strong></td><td class="val-col">6</td><td class="val-col highlight-match">6</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">22</td><td><strong>Brian Gutiérrez</strong></td><td class="val-col">6</td><td class="val-col highlight-match">6</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">23</td><td><strong>Marcel Hartel</strong></td><td class="val-col">6</td><td class="val-col highlight-match">6</td><td class="val-col">4</td></tr>
+                    <tr><td class="rank-col">24</td><td><strong>Sam Surridge</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">25</td><td><strong>E. Choupo-Moting</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">4</td></tr>
+                    <tr><td class="rank-col">26</td><td><strong>Prince Owusu</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">27</td><td><strong>Rafael Navarro</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">28</td><td><strong>Mario Pašalić</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">29</td><td><strong>David Musovski</strong></td><td class="val-col">5</td><td class="val-col highlight-match">5</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">30</td><td><strong>Joseph Paintsil</strong></td><td class="val-col">5</td><td class="val-col highlight-diff">4</td><td class="val-col">2</td></tr>
+                    <tr><td class="rank-col">31</td><td><strong>Idan Toklomati</strong></td><td class="val-col">4</td><td class="val-col highlight-match">4</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">32</td><td><strong>Son Heung-Min</strong></td><td class="val-col">4</td><td class="val-col highlight-match">4</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">33</td><td><strong>Tai Baribo</strong></td><td class="val-col">4</td><td class="val-col highlight-match">4</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">34</td><td><strong>Diego Rossi</strong></td><td class="val-col">4</td><td class="val-col highlight-diff">5</td><td class="val-col">4</td></tr>
+                    <tr><td class="rank-col">35</td><td><strong>Facundo Allende</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">36</td><td><strong>Hugo Cuypers</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">37</td><td><strong>Joao Klauss</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">38</td><td><strong>J. Russell-Rowe</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">39</td><td><strong>K. Yeboah</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">40</td><td><strong>Milan Iloski</strong></td><td class="val-col">3</td><td class="val-col highlight-diff">8</td><td class="val-col">6</td></tr>
+                    <tr><td class="rank-col">41</td><td><strong>Thomas Müller</strong></td><td class="val-col">3</td><td class="val-col highlight-match">0</td><td class="val-col">3</td></tr>
+                    <tr><td class="rank-col">42</td><td><strong>Christian Benteke</strong></td><td class="val-col">3</td><td class="val-col highlight-match">3</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">43</td><td><strong>A. Martínez (NYC)</strong></td><td class="val-col">2</td><td class="val-col highlight-match">2</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">44</td><td><strong>Josef Martínez (SJ)</strong></td><td class="val-col">2</td><td class="val-col highlight-match">2</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">45</td><td><strong>Kevin Denkey</strong></td><td class="val-col">2</td><td class="val-col highlight-match">2</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">46</td><td><strong>Brian White</strong></td><td class="val-col">2</td><td class="val-col highlight-match">2</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">47</td><td><strong>Deandre Sealy</strong></td><td class="val-col">2</td><td class="val-col highlight-match">2</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">48</td><td><strong>A. Markanich</strong></td><td class="val-col">1</td><td class="val-col highlight-match">1</td><td class="val-col">0</td></tr>
+                    <tr><td class="rank-col">49</td><td><strong>Ezequiel Ponce</strong></td><td class="val-col">1</td><td class="val-col highlight-match">1</td><td class="val-col">0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 40px; color: #8899a6; font-size: 0.8em; text-align: center; border-top: 1px solid #2a3542; padding-top: 20px;">
+            Zvýrazněné hodnoty u Flashscore značí odchylku od oficiálního součtu MLS (Reg + PO).<br>
+            Data SofaScore jsou omezena na top 60 hráčů dle ratingu z tvého vstupu.
+        </div>
+    </div>
+
+    <script>
+        let currentSortCol = 2; // Default sorting by MLS Total
+        let sortAsc = false;
+
+        function sortTable(n, isNumeric) {
+            const table = document.getElementById("assistsTable");
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            const ths = table.querySelectorAll("th");
+
+            // Toggle sort direction if same column, else default to DESC for numbers, ASC for text
+            if (currentSortCol === n) {
+                sortAsc = !sortAsc;
+            } else {
+                sortAsc = (n === 1); // ASC for names, DESC for numbers
+                currentSortCol = n;
+            }
+
+            // Update UI
+            ths.forEach(th => th.classList.remove('sort-active'));
+            ths[n].classList.add('sort-active');
+
+            const sortedRows = rows.sort((a, b) => {
+                let x = a.getElementsByTagName("TD")[n].innerText.replace('+', '');
+                let y = b.getElementsByTagName("TD")[n].innerText.replace('+', '');
+                
+                if (isNumeric) {
+                    x = parseFloat(x) || 0;
+                    y = parseFloat(y) || 0;
+                    return sortAsc ? x - y : y - x;
+                } else {
+                    return sortAsc ? x.localeCompare(y) : y.localeCompare(x);
+                }
+            });
+
+            // Re-append rows
+            tbody.innerHTML = "";
+            sortedRows.forEach((row, index) => {
+                // Dynamic re-numbering
+                row.querySelector('.rank-col').innerText = index + 1;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize sorting indicator
+        document.querySelectorAll("th")[2].classList.add('sort-active');
+    </script>
+</body>
+</html>
