@@ -185,6 +185,27 @@
             color: #ff3333;
             font-style: italic;
         }
+
+        /* Matrix Styles Refinement */
+        .matrix-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+        .m-tag {
+            font-size: 0.65em;
+            padding: 2px 5px;
+            border-radius: 3px;
+            width: 100%;
+            text-align: center;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        .m-plus2 { background: rgba(227, 27, 35, 0.2); color: #ff3333; border-color: rgba(227, 27, 35, 0.3); }
+        .m-plus0 { background: rgba(0, 230, 118, 0.1); color: #00e676; border-color: rgba(0, 230, 118, 0.2); }
+        .m-plus1 { background: rgba(255, 215, 0, 0.1); color: #ffd700; border-color: rgba(255, 215, 0, 0.2); }
+        .m-val { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -255,24 +276,24 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="column-title">Týmové Stats (22.2.)</div>
+                <div class="column-title">Match stats (22.2.)</div>
                 <table class="comparison-table">
                     <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>PL / Scoresway / Fotmob</strong> <img src="https://www.google.com/s2/favicons?domain=premierleague.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; vertical-align:middle; background:white; border-radius:2px; padding:1px;"></td>
                             <td><strong>5:1</strong></td>
-                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Excludes Both (+0)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px; vertical-align:middle;"></td>
                             <td><strong>5:3</strong></td>
-                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                            <td><span class="discrepancy-badge">Counts Both (+2)</span></td>
                         </tr>
                         <tr>
                             <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px; vertical-align:middle;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px; vertical-align:middle;"></td>
                             <td><strong>5:2</strong></td>
-                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                            <td><span class="discrepancy-badge">Counts 1st (+1)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -353,24 +374,24 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="column-title">Týmové Stats (21.2.)</div>
+                <div class="column-title">Match stats (21.2.)</div>
                 <table class="comparison-table">
                     <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
                             <td><strong>1:2</strong></td>
-                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Excludes Both (+0)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
                             <td><strong>3:2</strong></td>
-                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                            <td><span class="discrepancy-badge">Counts Both (+2)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Ofiko / 365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=legaseriea.it" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
                             <td><strong>2:2</strong></td>
-                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                            <td><span class="discrepancy-badge">Counts 1st (+1)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -443,24 +464,24 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="column-title">Týmové Stats (15.2.)</div>
+                <div class="column-title">Match stats (15.2.)</div>
                 <table class="comparison-table">
                     <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>Fotmob / Ofiko / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=laliga.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
                             <td><strong>1:2</strong></td>
-                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Excludes Both (+0)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
                             <td><strong>3:2</strong></td>
-                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                            <td><span class="discrepancy-badge">Counts Both (+2)</span></td>
                         </tr>
                         <tr>
                             <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
                             <td><strong>2:2</strong></td>
-                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                            <td><span class="discrepancy-badge">Counts 1st (+1)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -534,24 +555,24 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="column-title">Týmové Stats (6.2.)</div>
+                <div class="column-title">Match stats (6.2.)</div>
                 <table class="comparison-table">
                     <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
                             <td><strong>4:1</strong></td>
-                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Excludes Both (+0)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
                             <td><strong>4:3</strong></td>
-                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                            <td><span class="discrepancy-badge">Counts Both (+2)</span></td>
                         </tr>
                         <tr>
                             <td><strong>365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
                             <td><strong>4:2</strong></td>
-                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                            <td><span class="discrepancy-badge">Counts 1st (+1)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -560,7 +581,7 @@
     </div>
 
     <!-- ALEKSANDR GOLOVIN -->
-    <div class="player-section">
+    <div class="player-section" style="margin-bottom: 80px;">
         <div class="player-profile" style="border-left: 5px solid var(--ligue1-lime);">
             <div class="player-photo">
                 <img src="https://images.fotmob.com/image_resources/playerimages/586388.png" alt="Aleksandr Golovin">
@@ -621,24 +642,24 @@
             </div>
 
             <div class="dashboard-column">
-                <div class="column-title">Týmové Stats (13.2.)</div>
+                <div class="column-title">Match stats (13.2.)</div>
                 <table class="comparison-table">
                     <thead><tr><th>Zdroj</th><th>Poměr</th><th>Metodika</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>Fotmob / Scoresway</strong> <img src="https://www.google.com/s2/favicons?domain=fotmob.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=scoresway.com" style="width:14px; background:white; border-radius:2px; padding:1px;"></td>
                             <td><strong>3:2</strong></td>
-                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Match YCs excluded</span></td>
+                            <td><span class="discrepancy-badge" style="color:#00e676; background:rgba(0,230,118,0.1)">Excludes Both (+0)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Flashscore / SofaScore</strong> <img src="https://www.google.com/s2/favicons?domain=flashscore.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=sofascore.com" style="width:14px;"></td>
                             <td><strong>5:2</strong></td>
-                            <td><span class="discrepancy-badge">2nd YC as 2Y</span></td>
+                            <td><span class="discrepancy-badge">Counts Both (+2)</span></td>
                         </tr>
                         <tr>
                             <td><strong>Ofiko / 365 / Mackolik</strong> <img src="https://www.google.com/s2/favicons?domain=ligue1.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=365scores.com" style="width:14px;"> <img src="https://www.google.com/s2/favicons?domain=mackolik.com" style="width:14px;"></td>
                             <td><strong>4:2</strong></td>
-                            <td><span class="discrepancy-badge">Only counts 1st Yellow cards</span></td>
+                            <td><span class="discrepancy-badge">Counts 1st (+1)</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -646,13 +667,13 @@
         </div>
     </div>
 
-    <!-- METHODOLOGY SUMMARY MATRIX -->
+    <!-- INTEGRATED METHODOLOGY SUMMARY MATRIX -->
     <div class="player-section" style="background: #1e2732; border: 1px solid var(--serie-a-blue);">
-        <h2 style="color: var(--serie-a-blue); margin-bottom: 30px; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Metodická matice: Jak zdroje interpretují 2nd YC</h2>
+        <h2 style="color: var(--serie-a-blue); margin-bottom: 30px; text-align: center; text-transform: uppercase; letter-spacing: 2px;">Metodický Souhrn: Match Stats vs Season Aggregation</h2>
         <table class="comparison-table" style="text-align: center;">
             <thead>
                 <tr>
-                    <th style="text-align: left; font-size: 1em;">Zdroj / Liga</th>
+                    <th style="text-align: left; font-size: 1em; width: 200px;">Zdroj / Liga</th>
                     <th style="text-align: center;">Premier League</th>
                     <th style="text-align: center;">Serie A</th>
                     <th style="text-align: center;">LaLiga</th>
@@ -661,44 +682,61 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Flashscore -->
                 <tr>
-                    <td style="text-align: left;"><strong>Flashscore / SofaScore</strong></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(227, 27, 35, 0.2); color: #ff3333; width: 100%; display: block;">2nd YC as 2Y</span></td>
+                    <td style="text-align: left;"><strong>Flashscore</strong></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus2">Season: +2</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus2">Season: +2</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus2">Season: +2</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus2">Season: +2</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus2">Season: +2</span></div></td>
                 </tr>
+                <!-- SofaScore -->
+                <tr>
+                    <td style="text-align: left;"><strong>SofaScore / Pipeline</strong></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus2">Match: +2</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                </tr>
+                <!-- FotMob -->
                 <tr>
                     <td style="text-align: left;"><strong>FotMob / Scoresway</strong></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
                 </tr>
+                <!-- 365Scores -->
                 <tr>
                     <td style="text-align: left;"><strong>365Scores / Mackolik</strong></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus0">Season: +0</span></div></td>
                 </tr>
+                <!-- Official -->
                 <tr>
                     <td style="text-align: left;"><strong>Oficiální zdroj</strong></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(0, 230, 118, 0.1); color: #00e676; width: 100%; display: block;">Match YCs Excluded</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 255, 255, 0.1); color: #fff; width: 100%; display: block; border: 1px dashed #ff3333;">Broken (0 RC)</span></td>
-                    <td><span class="discrepancy-badge" style="background: rgba(255, 215, 0, 0.1); color: #ffd700; width: 100%; display: block;">Only counts 1st YC</span></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus1">Season: +1</span></div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus0">Match: +0</span><span class="m-tag m-plus0">Season: +0</span></div></td>
+                    <td><div class="matrix-cell" style="color:#ff3333; font-size:0.7em; padding:10px;">BROKEN DATA</div></td>
+                    <td><div class="matrix-cell"><span class="m-tag m-plus1">Match: +1</span><span class="m-tag m-plus1">Season: +1</span></div></td>
                 </tr>
             </tbody>
         </table>
-        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px; font-size: 0.8em; color: #8899a6;">
-            <span><strong style="color: #ff3333;">2nd YC as 2Y:</strong> Počítá obě žluté karty do týmových statistik.</span>
-            <span><strong style="color: #00e676;">Match YCs Excluded:</strong> V zápase se 2nd YC nepočítá žádnou žlutou kartu, pouze červenou.</span>
-            <span><strong style="color: #ffd700;">Only counts 1st YC:</strong> V zápase se 2nd YC započítá pouze první žlutou kartu.</span>
+        <div style="display: flex; gap: 40px; justify-content: center; margin-top: 30px; font-size: 0.85em; color: #8899a6; text-align: left;">
+            <div>
+                <strong style="color: #ff3333;">Counts Both (+2):</strong> Konzistentní započítání obou karet.<br>
+                <strong style="color: #00e676;">Excludes Both (+0):</strong> Konzistentní vyloučení obou karet.
+            </div>
+            <div>
+                <strong style="color: #ffd700;">Counts 1st (+1):</strong> Konzistentní započítání pouze první karty.
+            </div>
         </div>
     </div>
 
